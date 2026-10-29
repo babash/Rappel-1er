@@ -1,0 +1,121 @@
+/* Tableau de bord du professeur (complète style.css) */
+.page-prof { background: var(--fond); }
+.barre-prof { justify-content: space-between; height: auto; min-height: var(--entete-h); flex-wrap: wrap; padding: 8px 16px; gap: .6rem; }
+.barre-prof .marque { text-decoration: none; }
+.prof-entete-actions { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; }
+.prof-entete-actions select { font: 500 .9rem var(--police-texte); border-radius: 99px; padding: .45em .9em; border: 1px solid rgba(255, 255, 255, .3); background: rgba(255, 255, 255, .1); color: var(--entete-texte); max-width: 300px; }
+.prof-entete-actions select option { color: #14303d; }
+.prof-entete-actions .bouton { background: rgba(255, 255, 255, .08); border-color: rgba(255, 255, 255, .25); color: var(--entete-texte); }
+.prof-entete-actions .bouton:hover { background: rgba(255, 255, 255, .16); }
+.interrupteur { display: inline-flex; align-items: center; gap: .35rem; font-size: .85rem; cursor: pointer; }
+.interrupteur input { width: 16px; height: 16px; accent-color: var(--accent); }
+
+.prof-centre { min-height: calc(100vh - var(--entete-h)); display: grid; place-items: center; padding: 24px; }
+.carte-connexion.large { max-width: 640px; }
+.prof { padding: 18px clamp(12px, 2.5vw, 28px) 60px; display: flex; flex-direction: column; gap: 1rem; }
+.prof-resume { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: .7rem; }
+.prof-chiffre { background: var(--surface); border: 1px solid var(--trait); border-radius: var(--r-moyen); padding: .7rem .9rem; display: flex; flex-direction: column; }
+.prof-chiffre strong { font-family: var(--police-titre); font-size: 1.6rem; line-height: 1.1; }
+.prof-chiffre span { color: var(--texte-doux); font-size: .82rem; }
+.prof-chiffre.vert strong { color: var(--herbier); }
+.prof-chiffre.rouge { border-color: var(--corail-bord); background: var(--corail-fond); }
+.prof-chiffre.rouge strong { color: var(--corail); }
+
+.prof-alertes h2 { font-size: 1.15rem; margin-bottom: .5rem; }
+.liste-alertes { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: .5rem; }
+.alerte { display: grid; grid-template-columns: 40px 1fr auto; gap: .6rem; align-items: center; background: var(--balise-fond); border: 1.5px solid var(--balise-bord); border-radius: var(--r-moyen); padding: .55rem .7rem; }
+.alerte.fort { background: var(--corail-fond); border-color: var(--corail-bord); }
+.alerte-avatar { font-size: 1.6rem; text-align: center; }
+.alerte-raisons { font-size: .82rem; color: var(--texte-doux); }
+
+.prof-onglets { display: flex; gap: .3rem; border-bottom: 1px solid var(--trait); }
+.prof-onglets button { border: none; background: none; padding: .6em 1em; font: 600 .95rem var(--police-texte); color: var(--texte-doux); border-bottom: 3px solid transparent; cursor: pointer; }
+.prof-onglets button.actif { color: var(--texte); border-bottom-color: var(--accent); }
+.prof-maj { text-align: right; }
+.vide-prof { background: var(--surface); border: 1px dashed var(--trait); border-radius: var(--r-moyen); padding: 1.5rem; text-align: center; }
+
+.grille-outils { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; margin-bottom: .6rem; }
+.grille-outils select { font: 500 .9rem var(--police-texte); padding: .4em .7em; border-radius: 8px; border: 1px solid var(--trait); background: var(--surface); color: var(--texte); }
+.legende { display: flex; gap: .9rem; flex-wrap: wrap; font-size: .8rem; color: var(--texte-doux); }
+.leg { display: inline-flex; align-items: center; gap: .3rem; }
+.grille-defile { overflow-x: auto; background: var(--surface); border: 1px solid var(--trait); border-radius: var(--r-moyen); }
+.grille-classe { border-collapse: collapse; width: 100%; font-size: .85rem; }
+.grille-classe th, .grille-classe td { padding: 3px 4px; text-align: center; border-bottom: 1px solid var(--trait); }
+.grille-classe thead th { position: sticky; top: 0; background: var(--surface-2); font-weight: 600; font-size: .78rem; color: var(--texte-doux); padding: 8px 4px; }
+.grille-classe .col-eleve { text-align: left; position: sticky; left: 0; background: var(--surface); z-index: 1; min-width: 170px; }
+.grille-classe thead .col-eleve { background: var(--surface-2); z-index: 2; }
+.grille-classe tr.a-aider .col-eleve { box-shadow: inset 4px 0 0 var(--corail); }
+.eleve-bouton { display: flex; align-items: center; gap: .45rem; border: none; background: none; cursor: pointer; font: 500 .9rem var(--police-texte); color: var(--texte); padding: .3rem .2rem; width: 100%; text-align: left; }
+.eleve-bouton:hover .eleve-pseudo { text-decoration: underline; }
+.eleve-avatar { font-size: 1.2rem; }
+.grille-classe .point-en-ligne { position: static; display: inline-block; border: none; flex: none; }
+.cell button, .case-leg { width: 30px; height: 30px; border-radius: 8px; display: inline-grid; place-items: center; font: 700 .8rem var(--police-texte); border: 2px solid transparent; cursor: pointer; }
+.case-leg { cursor: default; width: 22px; height: 22px; font-size: .72rem; }
+.cell.vide button, .case-leg.vide { background: var(--surface-2); border-color: var(--trait); color: transparent; }
+.cell.ok3 button, .case-leg.ok3 { background: #2f9e5b; color: #fff; }
+.cell.ok2 button, .case-leg.ok2 { background: #9fd8b3; color: #14503a; }
+.cell.ok1 button, .case-leg.ok1 { background: #f2c14e; color: #4a3500; }
+.cell.cours button, .case-leg.cours { background: var(--accent-fond); border-color: var(--accent); color: var(--accent-fort); }
+.cell.courante button, .case-leg.courante { box-shadow: 0 0 0 3px var(--surface), 0 0 0 5px #e5484d; }
+.case-leg.courante { background: var(--surface); }
+.case-d { font-family: var(--police-code); font-size: .76rem; color: var(--texte-doux); min-width: 44px; }
+.case-d.partiel { color: var(--accent-fort); font-weight: 600; }
+.case-d.fini { color: var(--herbier); font-weight: 700; }
+.case-d.courante { box-shadow: inset 0 -3px 0 #e5484d; }
+.grille-classe td.num { font-family: var(--police-code); font-size: .78rem; color: var(--texte-doux); white-space: nowrap; padding: 0 8px; }
+
+.stats-missions { border-collapse: collapse; width: 100%; font-size: .86rem; }
+.stats-missions th, .stats-missions td { padding: .5rem .6rem; border-bottom: 1px solid var(--trait); text-align: left; vertical-align: middle; }
+.stats-missions th { background: var(--surface-2); font-size: .78rem; color: var(--texte-doux); }
+.stats-missions td small { display: block; color: var(--texte-doux); font-size: .75rem; }
+.stats-missions td.num { font-family: var(--police-code); text-align: center; }
+.stats-missions .barre-progres { width: 110px; }
+.stats-missions tr.difficile td { background: var(--corail-fond); }
+
+.flux { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+.evenement { display: grid; grid-template-columns: 52px 26px 1fr; gap: .4rem; align-items: start; padding: .4rem .5rem; border-radius: 8px; background: var(--surface); border: 1px solid var(--trait); font-size: .86rem; }
+.evenement.ko { border-left: 4px solid var(--corail-bord); }
+.evenement.okk, .evenement.t-reussite { border-left: 4px solid var(--herbier-bord); }
+.evenement.t-solution { border-left: 4px solid #f2c14e; }
+.ev-heure { font-family: var(--police-code); color: var(--texte-doux); font-size: .78rem; padding-top: 2px; }
+.ev-icone { text-align: center; }
+.ev-detail { color: var(--texte-doux); font-size: .8rem; word-break: break-word; }
+.ev-texte .code-statique { margin-top: .3rem; font-size: .8rem; }
+
+.tiroir.tiroir-large { width: min(760px, 100%); }
+.fiche-chiffres { display: flex; flex-wrap: wrap; gap: .4rem 1.1rem; font-size: .9rem; color: var(--texte-doux); }
+.fiche-chiffres strong { color: var(--texte); }
+.fiche-actions { display: flex; gap: .5rem; margin: .8rem 0 .2rem; flex-wrap: wrap; }
+.fiche-eleve h3 { margin-top: 1.1rem; font-size: 1.1rem; }
+.fiche-missions { display: flex; flex-direction: column; gap: .35rem; }
+.fiche-mission { border: 1px solid var(--trait); border-radius: var(--r-moyen); background: var(--surface); }
+.fiche-mission.courante { border-color: #e5484d; }
+.fiche-mission summary { display: grid; grid-template-columns: 26px auto 1fr; gap: .55rem; align-items: center; padding: .45rem .6rem; cursor: pointer; }
+.fiche-mission summary small { color: var(--texte-doux); font-size: .78rem; text-align: right; }
+.fiche-mission-corps { padding: 0 .7rem .7rem; font-size: .88rem; }
+.fiche-mission-corps h4 { margin: .5rem 0 .3rem; font-size: .85rem; }
+
+.gestion-classes .nouvelle-classe { display: flex; gap: .5rem; }
+.gestion-classes input[type=text] { flex: 1; font: 400 1rem var(--police-texte); padding: .55em .8em; border-radius: var(--r-moyen); border: 1.5px solid var(--trait); background: var(--surface-2); color: var(--texte); }
+.liste-classes { list-style: none; padding: 0; margin: .8rem 0; display: flex; flex-direction: column; gap: .4rem; }
+.liste-classes li { display: flex; align-items: center; justify-content: space-between; gap: .6rem; background: var(--surface-2); border: 1px solid var(--trait); border-radius: var(--r-moyen); padding: .5rem .7rem; }
+.formulaire input[type=text], .formulaire input[type=password] { font: 400 1rem var(--police-texte); padding: .6em .8em; border-radius: var(--r-moyen); border: 1.5px solid var(--trait); background: var(--surface-2); color: var(--texte); }
+
+/* codes d'expédition et compétences */
+.code-prof { font: 700 .95rem var(--police-code); letter-spacing: .04em; background: var(--balise-fond); border-color: var(--balise-bord); white-space: nowrap; }
+.fiche-code { margin: .7rem 0 .2rem; display: flex; align-items: center; gap: .4rem; flex-wrap: wrap; }
+.table-codes td { vertical-align: middle; }
+.grille-competences td.comp { min-width: 110px; padding: 6px 8px; }
+.comp-barre { display: block; height: 8px; border-radius: 99px; background: var(--surface-2); border: 1px solid var(--trait); overflow: hidden; margin-bottom: 2px; }
+.comp-barre > span { display: block; height: 100%; background: linear-gradient(90deg, var(--accent), #f2c14e); }
+.grille-competences small { color: var(--texte-doux); font-family: var(--police-code); }
+.ligne-moyenne th, .ligne-moyenne td { background: var(--surface-2); }
+.fiche-eleve .liste-competences { margin-top: .3rem; }
+.prof-onglets { overflow-x: auto; }
+.prof-onglets button { white-space: nowrap; }
+
+@media (max-width: 900px) {
+  .prof-resume { grid-template-columns: repeat(2, 1fr); }
+  .barre-prof .marque-texte { display: none; }
+  .liste-alertes { grid-template-columns: 1fr; }
+}
