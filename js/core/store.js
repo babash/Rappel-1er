@@ -473,10 +473,11 @@ BNL.Store = (() => {
     changerSync("ok");
   }
 
-  const listerClasses = () => rpc("gb_classes_ouvertes", {});
+  // La classe qui correspond au code donné par le professeur : { nom, prof, ouverte }
+  const classeParCode = (code) => rpc("gb_classe_par_code", { p_code: code });
 
-  async function inscrire(classeId, pseudo, avatarId) {
-    const fiche = await rpc("gb_inscription", { p_classe: classeId, p_pseudo: pseudo, p_avatar: avatar(avatarId).emoji });
+  async function inscrire(codeClasse, pseudo, avatarId) {
+    const fiche = await rpc("gb_inscription", { p_code_classe: codeClasse, p_pseudo: pseudo, p_avatar: avatar(avatarId).emoji });
     etat = nouvelEtat();
     brouillons = {};
     appliquerFiche(fiche, false);
@@ -606,7 +607,7 @@ BNL.Store = (() => {
     avatarDebloque, themeDebloque, avatar, evaluerRecompenses,
     brouillon, setBrouillon,
     sauver, journal, viderJournal,
-    listerClasses, inscrire, connecter, reprendre, jouerHorsLigne, deconnecter, equipage, enLigne,
+    classeParCode, inscrire, connecter, reprendre, jouerHorsLigne, deconnecter, equipage, enLigne,
     normaliserCode, codeProgression, lireCodeProgression, restaurerProgression,
     surChangement: (f) => abonnes.push(f),
     surSync: (f) => { abonnesSync.push(f); f(statutSync); },

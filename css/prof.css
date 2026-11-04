@@ -12,6 +12,9 @@
 
 .prof-centre { min-height: calc(100vh - var(--entete-h)); display: grid; place-items: center; padding: 24px; }
 .carte-connexion.large { max-width: 640px; }
+.prof-centre > * { min-width: 0; max-width: 100%; }
+@media (max-width: 560px) { .prof-centre { padding: 16px; } .prof-centre .carte-connexion { padding: 1.1rem; } }
+.bloc-lien .code-prof { white-space: normal; overflow-wrap: anywhere; }
 .prof { padding: 18px clamp(12px, 2.5vw, 28px) 60px; display: flex; flex-direction: column; gap: 1rem; }
 .prof-resume { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: .7rem; }
 .prof-chiffre { background: var(--surface); border: 1px solid var(--trait); border-radius: var(--r-moyen); padding: .7rem .9rem; display: flex; flex-direction: column; }
@@ -95,8 +98,8 @@
 .fiche-mission-corps { padding: 0 .7rem .7rem; font-size: .88rem; }
 .fiche-mission-corps h4 { margin: .5rem 0 .3rem; font-size: .85rem; }
 
-.gestion-classes .nouvelle-classe { display: flex; gap: .5rem; }
-.gestion-classes input[type=text] { flex: 1; font: 400 1rem var(--police-texte); padding: .55em .8em; border-radius: var(--r-moyen); border: 1.5px solid var(--trait); background: var(--surface-2); color: var(--texte); }
+.gestion-classes .nouvelle-classe, .mon-lien .nouvelle-classe { display: flex; gap: .5rem; }
+.gestion-classes input[type=text], .mon-lien .nouvelle-classe input[type=text] { flex: 1; font: 400 1rem var(--police-texte); padding: .55em .8em; border-radius: var(--r-moyen); border: 1.5px solid var(--trait); background: var(--surface-2); color: var(--texte); }
 .liste-classes { list-style: none; padding: 0; margin: .8rem 0; display: flex; flex-direction: column; gap: .4rem; }
 .liste-classes li { display: flex; align-items: center; justify-content: space-between; gap: .6rem; background: var(--surface-2); border: 1px solid var(--trait); border-radius: var(--r-moyen); padding: .5rem .7rem; }
 .formulaire input[type=text], .formulaire input[type=password] { font: 400 1rem var(--police-texte); padding: .6em .8em; border-radius: var(--r-moyen); border: 1.5px solid var(--trait); background: var(--surface-2); color: var(--texte); }
@@ -118,4 +121,48 @@
   .prof-resume { grid-template-columns: repeat(2, 1fr); }
   .barre-prof .marque-texte { display: none; }
   .liste-alertes { grid-template-columns: 1fr; }
+}
+
+/* --- Espaces professeur sans mot de passe : entrée, lien personnel, invitation --- */
+.prof-entree { display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-start; align-content: center; gap: 18px; }
+.prof-entree .carte-connexion { width: min(440px, 100%); }
+.prof-nom { font-size: .88rem; opacity: .9; white-space: nowrap; max-width: 220px; overflow: hidden; text-overflow: ellipsis; }
+.bloc-lien { background: var(--balise-fond); border: 1.5px solid var(--balise-bord); border-radius: var(--r-moyen); padding: .8rem 1rem; margin: .6rem 0 1rem; }
+.bloc-lien p { margin: 0 0 .5rem; }
+.bloc-lien ul { margin: .5rem 0 0; padding-left: 1.2em; }
+.champ-lien { width: 100%; font: 500 .9rem var(--police-code); padding: .55em .7em; border: 1.5px solid var(--balise-bord); border-radius: 8px; background: var(--surface); color: var(--texte); }
+.bloc-lien-actions { display: flex; flex-wrap: wrap; gap: .45rem; margin: .55rem 0; }
+.bloc-lien-actions a.bouton { text-decoration: none; }
+.memo-appareil { margin: .2rem 0 .4rem; }
+.mon-lien h3 { font-size: 1rem; margin-top: 1rem; }
+.code-classe-petit { font-size: .82rem; color: var(--texte-doux); margin-top: .15rem; }
+.mon-lien .identite-espace { display: grid; grid-template-columns: 1fr; gap: .5rem; }
+@media (min-width: 560px) { .mon-lien .identite-espace { grid-template-columns: 1fr 1.4fr auto; } }
+.mon-lien .identite-espace input[type=text] { min-width: 0; font: 400 1rem var(--police-texte); padding: .55em .8em; border-radius: var(--r-moyen); border: 1.5px solid var(--trait); background: var(--surface-2); color: var(--texte); }
+.etiquette .facultatif { font-weight: 400; opacity: .7; font-size: .9em; }
+.prof-etab { color: var(--texte-doux); margin: -.3rem 0 .6rem; }
+.prof-nom small { opacity: .75; }
+.code-classe-titre { font-size: 1rem; letter-spacing: .06em; }
+.gestion-classes .liste-classes li { flex-direction: column; align-items: stretch; gap: .35rem; }
+.gestion-classes .liste-classes li > div:first-child { min-width: 0; }
+.actions-classe { display: flex; flex-wrap: wrap; align-items: center; gap: .2rem .5rem; }
+.actions-classe .interrupteur { margin-right: .4rem; }
+.gestion-classes .nouvelle-classe { flex-wrap: wrap; }
+.gestion-classes .nouvelle-classe input[type=text] { flex: 1 1 200px; min-width: 0; }
+.gestion-classes .nouvelle-classe .bouton { white-space: nowrap; flex: 0 0 auto; }
+@media (max-width: 480px) { .gestion-classes .nouvelle-classe .bouton { flex: 1 1 100%; } }
+.prof-nom { max-width: 300px; }
+
+.invitation-grand { display: grid; grid-template-columns: minmax(200px, 340px) minmax(0, 1fr); gap: 1.6rem; align-items: center; background: #fff; color: #10232c; border-radius: var(--r-grand); padding: 1.4rem; }
+.invitation-grand:fullscreen { padding: 4vw; grid-template-columns: minmax(0, 42vh) minmax(0, 1fr); font-size: 1.5vw; }
+.invitation-qr svg { display: block; width: 100%; height: auto; }
+.invitation-classe { font: 800 1.6em var(--police-titre); margin: 0 0 .5rem; }
+.invitation-texte ol { font-size: 1.1em; padding-left: 1.2em; margin: 0 0 .6rem; }
+.invitation-texte li { margin-bottom: .3rem; }
+.invitation-code { font: 800 clamp(2.4rem, 7vw, 4.6em) var(--police-code); letter-spacing: .1em; color: #0b4f6b; background: #fff5d6; border: 3px dashed #f2c14e; border-radius: 14px; padding: .2em .5em; width: fit-content; margin: .3rem 0 .6rem; }
+.invitation-actions { display: flex; gap: .5rem; align-items: center; margin-top: .9rem; flex-wrap: wrap; }
+.invitation-actions .champ-lien { flex: 1; min-width: 220px; border-color: var(--trait); }
+@media (max-width: 700px) {
+  .invitation-grand { grid-template-columns: 1fr; padding: 1rem; }
+  .invitation-qr { max-width: 260px; margin: 0 auto; }
 }

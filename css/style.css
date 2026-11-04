@@ -965,3 +965,9 @@ canvas.confettis { position: fixed; inset: 0; z-index: 300; pointer-events: none
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }
+
+/* Inscription : la classe trouvée grâce à son code */
+.info-classe { margin: -.4rem 0 0; font-size: .9rem; min-height: 1.3em; color: var(--texte-doux); }
+.info-classe.ok { color: var(--herbier); font-weight: 600; }
+.info-classe.erreur { color: var(--corail); }
+.champ small.aide-texte { font-size: .82rem; }

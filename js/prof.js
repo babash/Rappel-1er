@@ -1,4 +1,5 @@
-// Tableau de bord du professeur : suivi en direct de la classe, codes d'expédition.
+// Tableau de bord du professeur : espace sans mot de passe (lien secret), classes avec code
+// d'inscription et QR code, suivi en direct, codes d'expédition des élèves.
 (() => {
   const { $, $$, el, md, echapper, colorer, duree, depuis } = BNL.U;
   const P = BNL.Panneaux;
@@ -11,12 +12,38 @@
   const EXPEDITIONS = BNL.CHAPITRES.filter((c) => c.bonus);
   const TYPES = { etapes: "étapes à toucher", commande: "console", parsons: "lignes à ordonner", trace: "tableau d'avancement", code: "programme" };
   const app = () => $("#app");
-  // Le mot de passe ne va que dans sessionStorage (effacé à la fermeture de l'onglet), jamais dans un cookie.
+  // La clé de l'espace professeur : dans l'onglet (sessionStorage) et, si on le demande,
+  // sur cet appareil pendant 1 jour (localStorage avec date limite). Jamais dans un cookie.
   const lireSession = (k) => { try { return sessionStorage.getItem(k) || ""; } catch (e) { return ""; } };
   const ecrireSession = (k, v) => { try { if (v) sessionStorage.setItem(k, v); else sessionStorage.removeItem(k); } catch (e) { /* rien */ } };
+  const CLE_MEMO = "gb.prof.jour";
+  function lireMemo() {
+    try {
+      const m = JSON.parse(localStorage.getItem(CLE_MEMO) || "null");
+      if (m && m.expire > Date.now()) return m.cle;
+      localStorage.removeItem(CLE_MEMO);
+    } catch (e) { /* rien */ }
+    return "";
+  }
+  function ecrireMemo(cle) {
+    try {
+      if (cle) localStorage.setItem(CLE_MEMO, JSON.stringify({ cle, expire: Date.now() + 86400000 }));
+      else localStorage.removeItem(CLE_MEMO);
+    } catch (e) { /* rien */ }
+  }
+  // Clé passée dans le lien : prof.html#cle=PROF-XXXX-… (le fragment n'est jamais envoyé au serveur du site)
+  function cleDuLien() {
+    const m = location.hash.match(/[#&]cle=([^&]+)/);
+    if (!m) return "";
+    history.replaceState(null, "", location.pathname + location.search);   // on la retire de la barre d'adresse
+    return decodeURIComponent(m[1]);
+  }
+  const base = () => location.origin + location.pathname.replace(/[^/]*$/, "");
+  const lienProf = (cle) => base() + "prof.html#cle=" + cle;
+  const lienClasse = (code) => base() + "#classe=" + String(code).replace(/-/g, "");
 
   const etat = {
-    secret: lireSession("gb.prof"),
+    cle: "", nom: "", etab: "",
     classes: [], classeId: lireSession("gb.prof.classe"),
     eleves: [], flux: [], tri: "progression", onglet: "eleves", auto: true, maj: null, minuteur: null,
   };
@@ -55,40 +82,123 @@
     app().innerHTML = "";
     app().append(entete(), el("main.prof-centre", null, el("div.carte-connexion.large", null,
       el("h2", null, "Le suivi de classe n'est pas encore branché"),
-      el("div", { html: md(`Le jeu fonctionne déjà **sans serveur** : chaque élève garde sa progression 1 jour sur son appareil, et peut noter un **code de reprise**. Pour suivre la classe en direct et donner à chaque élève un **code d'expédition** valable partout :
+      el("div", { html: md(`Le jeu fonctionne déjà **sans serveur** : chaque élève garde sa progression 1 jour sur son appareil. Pour suivre la classe en direct et donner à chaque élève un **code d'expédition** valable partout :
 
-1. Crée un projet gratuit sur **supabase.com**.
-2. Dans *SQL Editor*, colle le contenu du fichier @supabase/schema.sql@ (après avoir remplacé @CHANGE-MOI@ par ton mot de passe), puis lance-le.
+1. Crée un projet gratuit sur **supabase.com** (ou utilise un projet existant : le jeu s'installe à côté, sans rien toucher).
+2. Dans *SQL Editor*, colle tout le fichier @supabase/schema.sql@, puis lance-le (aucune valeur à modifier).
 3. Dans *Project Settings › API Keys*, copie l'**URL du projet** et la **clé publique** (*publishable* ou *anon*).
 4. Colle-les dans @js/config.js@ (@SUPABASE_URL@ et @SUPABASE_KEY@), puis publie à nouveau le site.
 
 Tout est détaillé dans le fichier **README.md** du site.`) }))));
   }
 
-  function ecranConnexion(message) {
-    const mdp = el("input#mdp", { type: "password", autocomplete: "current-password", required: true, placeholder: "Mot de passe du tableau de bord" });
-    const msg = el("p.message-formulaire", { role: "alert" }, message || "");
-    const bouton = el("button.bouton.principal.large", { type: "submit" }, "Ouvrir le tableau de bord");
-    const form = el("form.formulaire", null, el("label.champ", null, el("span.etiquette", null, "Mot de passe"), mdp), msg, bouton);
-    form.addEventListener("submit", async (e) => {
+  // Pas de mot de passe : chaque professeur a son espace, ouvert par un lien secret.
+  function ecranEntree(message) {
+    const nom = el("input#nom-prof", { type: "text", maxlength: 40, autocomplete: "off", placeholder: "Ex. : Mme Ali (NSI)" });
+    const etab = el("input#etab-prof", { type: "text", maxlength: 80, autocomplete: "organization", placeholder: "Ex. : Lycée de Chirongui" });
+    const msgA = el("p.message-formulaire", { role: "alert" });
+    const creer = el("button.bouton.principal.large", { type: "submit" }, "Créer mon espace");
+    const formA = el("form.formulaire", null,
+      el("label.champ", null, el("span.etiquette", null, "Nom affiché aux élèves"), nom,
+        el("small.aide-texte", null, "Les élèves le voient en rejoignant ta classe. Pas besoin d'e-mail ni de mot de passe.")),
+      el("label.champ", null, el("span.etiquette", null, "Établissement ", el("span.facultatif", null, "(facultatif)")), etab,
+        el("small.aide-texte", null, "Affiché à côté de ton nom ; utile quand plusieurs lycées utilisent le jeu.")),
+      msgA, creer);
+    formA.addEventListener("submit", async (e) => {
       e.preventDefault();
-      bouton.disabled = true;
+      creer.disabled = true;
       try {
-        await rpc("gb_prof_test", { p_secret: mdp.value });
-        etat.secret = mdp.value;
-        ecrireSession("gb.prof", mdp.value);
-        await tableau();
-      } catch (err) {
-        msg.textContent = err.message;
-        bouton.disabled = false;
-      }
+        const info = await rpc("gb_prof_creer_espace", { p_nom: nom.value, p_etablissement: etab.value });
+        etat.cle = info.cle;
+        etat.nom = info.nom;
+        etat.etab = info.etablissement || "";
+        ecrireSession("gb.prof.cle", info.cle);
+        ecranCleCreee(info);
+      } catch (err) { msgA.textContent = err.message; creer.disabled = false; }
+    });
+    const lien = el("input#lien-prof", { type: "text", autocomplete: "off", spellcheck: "false", placeholder: "Colle ton lien (…/prof.html#cle=…) ou ta clé PROF-…" });
+    const msgB = el("p.message-formulaire", { role: "alert" }, message || "");
+    const ouvrir = el("button.bouton.large", { type: "submit" }, "Ouvrir mon espace");
+    const formB = el("form.formulaire", null, el("label.champ", null, el("span.etiquette", null, "Mon lien ou ma clé"), lien), msgB, ouvrir);
+    formB.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const v = lien.value.trim();
+      const m = v.match(/cle=([^&\s]+)/);
+      const cle = m ? decodeURIComponent(m[1]) : v;
+      if (cle.replace(/[^A-Za-z0-9]/g, "").length < 12) { msgB.textContent = "Colle le lien complet reçu à la création de ton espace, ou la clé PROF-…"; return; }
+      ouvrir.disabled = true;
+      const ok = await ouvrirEspace(cle, msgB);
+      if (!ok) ouvrir.disabled = false;
     });
     app().innerHTML = "";
-    app().append(entete(), el("main.prof-centre", null, el("div.carte-connexion", null,
-      el("h2", null, "Tableau de bord du professeur"),
-      el("p.aide-texte", null, "Le mot de passe a été choisi dans le script supabase/schema.sql (remplacement de CHANGE-MOI). Il reste en mémoire seulement le temps de cet onglet."),
-      form)));
-    mdp.focus();
+    app().append(entete(), el("main.prof-centre.prof-entree", null,
+      el("div.carte-connexion", null, el("h2", null, "Nouveau : créer mon espace"),
+        el("p.aide-texte", null, "Chaque professeur a son propre espace, avec ses classes. Tu recevras un lien personnel : c'est lui qui ouvre ton tableau de bord."),
+        formA),
+      el("div.carte-connexion", null, el("h2", null, "J'ai déjà un espace"),
+        el("p.aide-texte", null, "Le plus simple : ouvre le lien enregistré dans tes favoris ou ta messagerie. Sinon, colle-le ici."),
+        formB)));
+    nom.focus();
+  }
+
+  async function ouvrirEspace(cle, zoneMessage) {
+    try {
+      const info = await rpc("gb_prof_ouvrir", { p_cle: cle });
+      etat.cle = cle;
+      etat.nom = info.nom;
+      etat.etab = info.etablissement || "";
+      ecrireSession("gb.prof.cle", cle);
+      if (lireMemo()) ecrireMemo(cle);
+      await tableau();
+      return true;
+    } catch (err) {
+      if (err.statut === 400) { ecrireSession("gb.prof.cle", ""); ecrireMemo(""); }
+      if (zoneMessage) zoneMessage.textContent = err.message; else ecranEntree(err.message);
+      return false;
+    }
+  }
+
+  // Après la création : le lien, à enregistrer tout de suite (il n'est montré qu'ici et dans « Mon lien »)
+  function ecranCleCreee(info) {
+    const coche = el("input#lien-note", { type: "checkbox" });
+    const go = el("button.bouton.principal.large", { type: "button", disabled: true }, "Ouvrir mon tableau de bord");
+    coche.addEventListener("change", () => { go.disabled = !coche.checked; });
+    go.addEventListener("click", () => tableau());
+    app().innerHTML = "";
+    app().append(entete(), el("main.prof-centre", null, el("div.carte-connexion.large", null,
+      el("h2", null, `Bienvenue, ${info.nom} !`),
+      info.etablissement ? el("p.prof-etab", null, "🏫 " + info.etablissement) : null,
+      info.classes_recuperees ? el("p.aide-texte", null, `${info.classes_recuperees} classe(s) déjà créée(s) avec l'ancienne version ont été rattachées à ton espace.`) : null,
+      blocLien(info.cle),
+      el("label.case-a-cocher", { for: "lien-note" }, coche, el("span", null, "J'ai enregistré mon lien (favori, e-mail ou fichier)")),
+      go)));
+  }
+
+  function copier(texte, bouton) {
+    const fini = () => { if (bouton) { const t = bouton.textContent; bouton.textContent = "✔ Copié"; setTimeout(() => { bouton.textContent = t; }, 1600); } };
+    if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(texte).then(fini, () => P.toast("Copie impossible : sélectionne le texte et copie-le."));
+    else P.toast("Sélectionne le texte et copie-le (Ctrl+C).");
+  }
+
+  // Le lien de l'espace, avec les moyens de le garder
+  function blocLien(cle) {
+    const lien = lienProf(cle);
+    const champ = el("input.champ-lien", { type: "text", readonly: true, value: lien, "aria-label": "Ton lien professeur" });
+    champ.addEventListener("focus", () => champ.select());
+    const bCopier = el("button.bouton.petit.principal", { type: "button" }, "📋 Copier le lien");
+    bCopier.addEventListener("click", () => copier(lien, bCopier));
+    const corpsMail = `Mon espace professeur Expédition Gombessa :\n${lien}\n\nClé (si besoin) : ${cle}\nNe pas diffuser : ce lien ouvre mes classes.`;
+    const mail = el("a.bouton.petit", { href: "mailto:?subject=" + encodeURIComponent("Mon lien professeur Expédition Gombessa") + "&body=" + encodeURIComponent(corpsMail) }, "✉️ M'envoyer par e-mail");
+    const fichier = el("a.bouton.petit", { href: URL.createObjectURL(new Blob([corpsMail], { type: "text/plain;charset=utf-8" })), download: "lien-professeur-gombessa.txt" }, "💾 Télécharger un fichier");
+    return el("div.bloc-lien", null,
+      el("p", null, el("strong", null, "Ton lien personnel"), " : il ouvre ton tableau de bord depuis n'importe quel ordinateur ou téléphone, sans mot de passe."),
+      champ,
+      el("div.bloc-lien-actions", null, bCopier, mail, fichier),
+      el("p.aide-texte", null, "Clé (à garder aussi) : ", el("code.code-prof", null, cle)),
+      el("ul.aide-texte", null,
+        el("li", null, "Ajoute-le à tes favoris ou envoie-le-toi par e-mail : sans lui, on ne peut pas retrouver ton espace."),
+        el("li", null, "Pour co-animer avec un collègue, donne-lui ce lien. Pour un collègue qui a ses propres classes : qu'il crée son espace."),
+        el("li", null, "Lien partagé par erreur ? « Mon lien › Remplacer ma clé » : l'ancien lien ne marchera plus.")));
   }
 
   // ---------------------------------------------------------------------------
@@ -154,10 +264,10 @@ Tout est détaillé dans le fichier **README.md** du site.`) }))));
   // ---------------------------------------------------------------------------
   async function tableau() {
     try {
-      etat.classes = await rpc("gb_prof_classes", { p_secret: etat.secret });
+      etat.classes = await rpc("gb_prof_classes", { p_cle: etat.cle });
     } catch (e) {
-      if (/Mot de passe/.test(e.message)) ecrireSession("gb.prof", "");
-      return ecranConnexion(e.message);
+      if (e.statut === 400) { ecrireSession("gb.prof.cle", ""); ecrireMemo(""); }
+      return ecranEntree(e.message);
     }
     if (!etat.classes.find((c) => c.id === etat.classeId)) etat.classeId = etat.classes[0] ? etat.classes[0].id : "";
     construire();
@@ -173,12 +283,16 @@ Tout est détaillé dans le fichier **README.md** du site.`) }))));
     choixClasse.addEventListener("change", () => { etat.classeId = choixClasse.value; ecrireSession("gb.prof.classe", etat.classeId); rafraichir(); });
     const auto = el("label.interrupteur", null, el("input", { type: "checkbox", checked: etat.auto || null, onchange: (e) => { etat.auto = e.target.checked; } }), el("span", null, "Actualisation auto"));
     const actions = [
+      el("span.prof-nom", { title: "Ton espace" + (etat.etab ? " · " + etat.etab : "") }, "👤 " + (etat.nom || ""),
+        etat.etab ? el("small", null, " · " + etat.etab) : null),
       choixClasse,
+      el("button.bouton.petit.principal", { type: "button", onclick: inviter, disabled: !etat.classes.length || null }, "📣 Inviter les élèves"),
       el("button.bouton.petit", { type: "button", onclick: gererClasses }, "Gérer les classes"),
+      el("button.bouton.petit", { type: "button", onclick: monLien }, "🔗 Mon lien"),
       auto,
       el("button.bouton.petit", { type: "button", onclick: () => rafraichir() }, "↻ Actualiser"),
       el("button.bouton.petit", { type: "button", onclick: exporterCSV }, "Exporter (CSV)"),
-      el("button.bouton.petit.discret", { type: "button", onclick: () => { ecrireSession("gb.prof", ""); location.reload(); } }, "Se déconnecter"),
+      el("button.bouton.petit.discret", { type: "button", onclick: quitter }, "Quitter"),
     ];
     app().innerHTML = "";
     app().append(entete(actions), el("main.prof", null,
@@ -193,7 +307,7 @@ Tout est détaillé dans le fichier **README.md** du site.`) }))));
       el("p.prof-maj.aide-texte")));
     if (!etat.classes.length) {
       $(".prof-contenu").append(el("div.carte-connexion.large", null, el("h2", null, "Crée ta première classe"),
-        el("p", null, "Les élèves choisiront cette classe sur l'écran d'accueil du jeu, puis recevront leur code d'expédition."),
+        el("p", null, "Chaque classe reçoit un code d'inscription (et un lien / QR code) à donner aux élèves. Ils recevront ensuite leur propre code d'expédition."),
         el("button.bouton.principal", { type: "button", onclick: gererClasses }, "Créer une classe")));
     }
   }
@@ -202,11 +316,14 @@ Tout est détaillé dans le fichier **README.md** du site.`) }))));
     if (!etat.classeId) return;
     try {
       const [eleves, flux] = await Promise.all([
-        rpc("gb_prof_eleves", { p_secret: etat.secret, p_classe: etat.classeId }),
-        rpc("gb_prof_flux", { p_secret: etat.secret, p_classe: etat.classeId, p_depuis: new Date(Date.now() - 6 * 3600000).toISOString() }),
+        rpc("gb_prof_eleves", { p_cle: etat.cle, p_classe: etat.classeId }),
+        rpc("gb_prof_flux", { p_cle: etat.cle, p_classe: etat.classeId, p_depuis: new Date(Date.now() - 6 * 3600000).toISOString() }),
       ]);
       etat.eleves = eleves || [];
       etat.flux = flux || [];
+      const c = etat.classes.find((x) => x.id === etat.classeId);
+      const opt = $(`#choix-classe option[value="${etat.classeId}"]`);
+      if (c && opt) { c.nb_eleves = etat.eleves.length; opt.textContent = `${c.nom}${c.ouverte ? "" : " (fermée)"} · ${c.nb_eleves} élève${c.nb_eleves > 1 ? "s" : ""}`; }
       etat.maj = new Date();
       rendreResume();
       rendreAlertes();
@@ -259,7 +376,8 @@ Tout est détaillé dans le fichier **README.md** du site.`) }))));
     zone.innerHTML = "";
     if (!etat.eleves.length) {
       zone.append(el("div.vide-prof", null, el("p", null, "Aucun élève dans cette classe pour l'instant."),
-        el("p.aide-texte", null, "Donne aux élèves l'adresse du site : « Je commence l'expédition », ils choisissent la classe et leur prénom, puis notent leur code d'expédition.")));
+        el("p.aide-texte", null, "Clique sur « 📣 Inviter les élèves » : projette le QR code ou donne le code de la classe. Ils tapent leur prénom, puis notent leur code d'expédition."),
+        el("button.bouton.principal", { type: "button", onclick: inviter }, "📣 Inviter les élèves")));
       return;
     }
     if (etat.onglet === "eleves") rendreGrille(zone);
@@ -414,7 +532,7 @@ Tout est détaillé dans le fichier **README.md** du site.`) }))));
     const ok = await P.confirmer(`Donner un **nouveau code** à **${e.pseudo}** ? L'ancien code ne marchera plus, et l'élève devra se reconnecter avec le nouveau. Sa progression est conservée.`, { titre: "Nouveau code", oui: "Générer" });
     if (!ok) return;
     try {
-      const code = await rpc("gb_prof_nouveau_code", { p_secret: etat.secret, p_eleve: e.id });
+      const code = await rpc("gb_prof_nouveau_code", { p_cle: etat.cle, p_eleve: e.id });
       e.code = code;
       if (zoneCode) zoneCode.textContent = code;
       P.toast(`Nouveau code de ${echapper(e.pseudo)} : <strong>${echapper(code)}</strong>`, { type: "succes", duree: 12000 });
@@ -525,7 +643,7 @@ Tout est détaillé dans le fichier **README.md** du site.`) }))));
     contenu.append(el("h3", null, "Historique"), journal);
     if (missionCiblee) setTimeout(() => { const c = contenu.querySelector(`[data-mission="${missionCiblee}"]`); if (c) c.scrollIntoView({ block: "start" }); }, 100);
     try {
-      const evs = await rpc("gb_prof_evenements", { p_secret: etat.secret, p_eleve: id, p_limite: 300 });
+      const evs = await rpc("gb_prof_evenements", { p_cle: etat.cle, p_eleve: id, p_limite: 300 });
       if (!evs.length) journal.append(el("li.vide", null, "Aucun événement."));
       evs.forEach((v) => journal.append(ligneEvenement(v, false)));
     } catch (err) { journal.append(el("li.vide", null, err.message)); }
@@ -538,7 +656,7 @@ Tout est détaillé dans le fichier **README.md** du site.`) }))));
     const f = P.ouvrir(el("div.formulaire", null, el("p", null, "Nouveau prénom ou pseudo :"), champ, msg, el("div.boutons", null, ok)), { titre: "Renommer", classe: "petite" });
     ok.addEventListener("click", async () => {
       try {
-        await rpc("gb_prof_renommer_eleve", { p_secret: etat.secret, p_eleve: e.id, p_pseudo: champ.value });
+        await rpc("gb_prof_renommer_eleve", { p_cle: etat.cle, p_eleve: e.id, p_pseudo: champ.value });
         P.fermer(f);
         rafraichir();
       } catch (err) { msg.textContent = err.message; }
@@ -549,7 +667,7 @@ Tout est détaillé dans le fichier **README.md** du site.`) }))));
     const ok = await P.confirmer(`Supprimer **${e.pseudo}** et toute sa progression ? C'est définitif.`, { titre: "Supprimer l'élève", oui: "Supprimer" });
     if (!ok) return;
     try {
-      await rpc("gb_prof_supprimer_eleve", { p_secret: etat.secret, p_eleve: e.id });
+      await rpc("gb_prof_supprimer_eleve", { p_cle: etat.cle, p_eleve: e.id });
       P.fermer(fiche);
       P.toast("Élève supprimé.");
       rafraichir();
@@ -561,59 +679,159 @@ Tout est détaillé dans le fichier **README.md** du site.`) }))));
     const contenu = el("div.gestion-classes");
     const f = P.ouvrir(contenu, { titre: "Gérer les classes", classe: "petite" });
     async function rendre() {
-      etat.classes = await rpc("gb_prof_classes", { p_secret: etat.secret });
+      etat.classes = await rpc("gb_prof_classes", { p_cle: etat.cle });
       contenu.innerHTML = "";
-      const nom = el("input", { type: "text", maxlength: 40, placeholder: "Ex. : TNSI 1" });
+      const nom = el("input", { type: "text", maxlength: 40, placeholder: "Nom facultatif : TNSI 1, groupe B…", "aria-label": "Nom de la classe (facultatif)" });
       const msg = el("p.message-formulaire");
-      const creer = el("button.bouton.principal", { type: "button" }, "Créer");
+      const creer = el("button.bouton.principal", { type: "button" }, "Créer une classe");
       creer.addEventListener("click", async () => {
         try {
-          const id = await rpc("gb_prof_creer_classe", { p_secret: etat.secret, p_nom: nom.value });
+          const id = await rpc("gb_prof_creer_classe", { p_cle: etat.cle, p_nom: nom.value });
           etat.classeId = id;
           ecrireSession("gb.prof.classe", id);
           rendre();
         } catch (err) { msg.textContent = err.message; }
       });
-      contenu.append(el("div.nouvelle-classe", null, nom, creer), msg);
+      contenu.append(el("p.aide-texte", null, "Chaque classe est identifiée par son ", el("strong", null, "code d'inscription"), ". Le nom est facultatif : il t'aide à t'y retrouver et les élèves le voient en s'inscrivant."),
+        el("div.nouvelle-classe", null, nom, creer), msg);
       const ul = el("ul.liste-classes");
       etat.classes.forEach((c) => {
         const ouverte = el("input", { type: "checkbox", checked: c.ouverte || null });
         ouverte.addEventListener("change", async () => {
-          await rpc("gb_prof_modifier_classe", { p_secret: etat.secret, p_classe: c.id, p_nom: null, p_ouverte: ouverte.checked });
-          P.toast(ouverte.checked ? "Classe ouverte aux inscriptions." : "Classe fermée : plus de nouvelles inscriptions (les codes existants marchent toujours).");
+          await rpc("gb_prof_modifier_classe", { p_cle: etat.cle, p_classe: c.id, p_nom: null, p_ouverte: ouverte.checked });
+          P.toast(ouverte.checked ? "Classe ouverte aux inscriptions." : "Classe fermée : plus de nouvelles inscriptions (les codes d'expédition existants marchent toujours).");
         });
+        const nouveau = el("button.bouton.petit.discret", { type: "button", title: "L'ancien code d'inscription ne marchera plus" }, "Nouveau code");
+        nouveau.addEventListener("click", async () => {
+          const ok = await P.confirmer(`Changer le code d'inscription de **${c.nom}** ? L'ancien code et l'ancien QR code ne marcheront plus. Les élèves déjà inscrits ne sont pas touchés.`, { titre: "Nouveau code de classe", oui: "Changer" });
+          if (!ok) return;
+          await rpc("gb_prof_nouveau_code_classe", { p_cle: etat.cle, p_classe: c.id });
+          rendre();
+        });
+        const renommerC = el("button.bouton.petit.discret", { type: "button" }, "Renommer");
+        renommerC.addEventListener("click", () => renommerClasse(c, rendre));
         const suppr = el("button.bouton.petit.discret", { type: "button" }, "Supprimer");
         suppr.addEventListener("click", async () => {
           const ok = await P.confirmer(`Supprimer la classe **${c.nom}** et ses ${c.nb_eleves} élève(s) ? C'est définitif.`, { titre: "Supprimer la classe", oui: "Supprimer" });
           if (!ok) return;
-          await rpc("gb_prof_supprimer_classe", { p_secret: etat.secret, p_classe: c.id });
+          await rpc("gb_prof_supprimer_classe", { p_cle: etat.cle, p_classe: c.id });
           rendre();
         });
-        ul.append(el("li", null, el("div", null, el("strong", null, c.nom), el("small", null, ` · ${c.nb_eleves} élève(s)`)),
-          el("label.interrupteur", null, ouverte, el("span", null, "ouverte")), suppr));
+        ul.append(el("li", null,
+          el("div", null, el("code.code-prof.code-classe-titre", null, c.code), " ", el("strong", null, c.nom === "Classe " + c.code ? "" : c.nom),
+            el("small", null, ` · ${c.nb_eleves} élève(s)`)),
+          el("div.actions-classe", null, el("label.interrupteur", null, ouverte, el("span", null, "ouverte")), renommerC, nouveau, suppr)));
       });
       contenu.append(ul,
-        el("p.aide-texte", null, "Une classe fermée n'apparaît plus à l'inscription, mais les élèves déjà inscrits continuent avec leur code."),
-        el("button.lien", { type: "button", onclick: changerMotDePasse }, "Changer le mot de passe du tableau de bord"));
+        el("p.aide-texte", null, "Une classe fermée n'accepte plus de nouvelles inscriptions, mais les élèves déjà inscrits continuent avec leur code d'expédition."));
     }
     rendre().catch((err) => { contenu.append(el("p.message-formulaire", null, err.message)); });
     f.options.surFermeture = () => tableau();
   }
 
-  function changerMotDePasse() {
-    const champ = el("input", { type: "password", autocomplete: "new-password", placeholder: "Au moins 8 caractères" });
+  function renommerClasse(c, ensuite) {
+    const champ = el("input", { type: "text", maxlength: 40, value: c.nom === "Classe " + c.code ? "" : c.nom, placeholder: "Ex. : TNSI 1" });
     const msg = el("p.message-formulaire");
-    const ok = el("button.bouton.principal", { type: "button" }, "Changer");
-    const f = P.ouvrir(el("div.formulaire", null, champ, msg, el("div.boutons", null, ok)), { titre: "Nouveau mot de passe", classe: "petite" });
+    const ok = el("button.bouton.principal", { type: "button" }, "Enregistrer");
+    const f = P.ouvrir(el("div.formulaire", null, el("p", null, `Nom de la classe ${c.code} :`), champ, msg, el("div.boutons", null, ok)), { titre: "Renommer la classe", classe: "petite" });
+    champ.focus();
     ok.addEventListener("click", async () => {
+      const v = champ.value.trim() || "Classe " + c.code;
       try {
-        await rpc("gb_prof_changer_mot_de_passe", { p_secret: etat.secret, p_nouveau: champ.value });
-        etat.secret = champ.value;
-        ecrireSession("gb.prof", champ.value);
+        await rpc("gb_prof_modifier_classe", { p_cle: etat.cle, p_classe: c.id, p_nom: v, p_ouverte: null });
         P.fermer(f);
-        P.toast("Mot de passe changé.", { type: "succes" });
+        ensuite();
       } catch (err) { msg.textContent = err.message; }
     });
+  }
+
+  // Inviter les élèves : code de la classe, lien et QR code (à projeter)
+  function inviter() {
+    const c = etat.classes.find((x) => x.id === etat.classeId);
+    if (!c) { gererClasses(); return; }
+    const lien = lienClasse(c.code);
+    let qr = "";
+    try {
+      const q = qrcode(0, "M");
+      q.addData(lien);
+      q.make();
+      qr = q.createSvgTag({ cellSize: 6, margin: 2, scalable: true });
+    } catch (e) { qr = ""; }
+    const bCopier = el("button.bouton.petit", { type: "button" }, "📋 Copier le lien");
+    bCopier.addEventListener("click", () => copier(lien, bCopier));
+    const bPlein = el("button.bouton.petit", { type: "button" }, "⛶ Plein écran");
+    const contenu = el("div.invitation", null,
+      el("div.invitation-grand", null,
+        el("div.invitation-qr", { html: qr }),
+        el("div.invitation-texte", null,
+          el("p.invitation-classe", null, [c.nom === "Classe " + c.code ? "" : c.nom, etat.nom, etat.etab].filter(Boolean).join(" · ")),
+          el("ol", null,
+            el("li", null, "Scanne le QR code avec ton téléphone,"),
+            el("li", null, "ou ouvre ", el("strong", null, base().replace(/^https?:\/\//, "")), " › « Je commence l'expédition »"),
+            el("li", null, "et tape le code de la classe :")),
+          el("div.invitation-code", null, c.code),
+          el("p.aide-texte", null, "Ensuite : ton prénom, ton emblème, et NOTE ton code d'expédition."))),
+      c.ouverte ? null : el("p.message-formulaire", null, "⚠️ Cette classe est fermée aux inscriptions : ouvre-la dans « Gérer les classes »."),
+      el("div.invitation-actions", null, el("input.champ-lien", { type: "text", readonly: true, value: lien, "aria-label": "Lien d'inscription" }), bCopier, bPlein));
+    const f = P.ouvrir(contenu, { titre: "📣 Inviter les élèves", classe: "grande" });
+    bPlein.addEventListener("click", () => { const z = contenu.querySelector(".invitation-grand"); if (z.requestFullscreen) z.requestFullscreen(); });
+    return f;
+  }
+
+  // Mon lien : le revoir, le partager, le remplacer, renommer ou supprimer l'espace
+  function monLien() {
+    const contenu = el("div.mon-lien");
+    const memo = el("input", { type: "checkbox", checked: !!lireMemo() || null });
+    memo.addEventListener("change", () => { ecrireMemo(memo.checked ? etat.cle : ""); P.toast(memo.checked ? "Cet appareil se souviendra de ton espace jusqu'à demain." : "Cet appareil ne garde plus ton espace (seulement cet onglet)."); });
+    const nom = el("input", { type: "text", maxlength: 40, value: etat.nom, "aria-label": "Nom affiché aux élèves" });
+    const etab = el("input", { type: "text", maxlength: 80, value: etat.etab || "", placeholder: "Établissement (facultatif)", "aria-label": "Établissement (facultatif)" });
+    const msg = el("p.message-formulaire");
+    const enregistrer = el("button.bouton.petit", { type: "button" }, "Enregistrer");
+    enregistrer.addEventListener("click", async () => {
+      try {
+        await rpc("gb_prof_modifier_espace", { p_cle: etat.cle, p_nom: nom.value, p_etablissement: etab.value });
+        etat.nom = nom.value.trim();
+        etat.etab = etab.value.trim();
+        msg.textContent = "";
+        P.toast("Espace mis à jour.", { type: "succes" });
+        construire(); rafraichir();
+      } catch (err) { msg.textContent = err.message; }
+    });
+    const remplacer = el("button.bouton.petit", { type: "button" }, "🔄 Remplacer ma clé");
+    remplacer.addEventListener("click", async () => {
+      const ok = await P.confirmer("Créer une **nouvelle clé** ? L'ancien lien ne marchera plus (pour toi et pour les collègues à qui tu l'as donné). Tes classes et tes élèves ne changent pas.", { titre: "Remplacer ma clé", oui: "Remplacer" });
+      if (!ok) return;
+      try {
+        const cle = await rpc("gb_prof_nouvelle_cle", { p_cle: etat.cle });
+        etat.cle = cle;
+        ecrireSession("gb.prof.cle", cle);
+        if (lireMemo()) ecrireMemo(cle);
+        P.fermer(f);
+        monLien();
+        P.toast("Nouvelle clé créée : enregistre ce nouveau lien.", { type: "succes", duree: 9000 });
+      } catch (err) { msg.textContent = err.message; }
+    });
+    const supprimer = el("button.bouton.petit.discret", { type: "button" }, "Supprimer mon espace…");
+    supprimer.addEventListener("click", async () => {
+      const ok = await P.confirmer(`Supprimer **ton espace**, toutes tes classes (${etat.classes.length}) et tous leurs élèves ? C'est **définitif**.`, { titre: "Supprimer mon espace", oui: "Tout supprimer" });
+      if (!ok) return;
+      try { await rpc("gb_prof_supprimer_espace", { p_cle: etat.cle }); ecrireSession("gb.prof.cle", ""); ecrireMemo(""); location.replace(location.pathname); } catch (err) { msg.textContent = err.message; }
+    });
+    contenu.append(blocLien(etat.cle),
+      el("label.interrupteur.memo-appareil", null, memo, el("span", null, "Se souvenir de mon espace sur cet appareil jusqu'à demain")),
+      el("h3", null, "Nom et établissement affichés aux élèves"),
+      el("div.identite-espace", null, nom, etab, enregistrer), msg,
+      el("h3", null, "Sécurité"),
+      el("p.aide-texte", null, "Ton lien donne accès à tes classes. Si tu l'as partagé par erreur, remplace la clé."),
+      el("div.bloc-lien-actions", null, remplacer, supprimer));
+    const f = P.ouvrir(contenu, { titre: "🔗 Mon lien professeur", classe: "petite" });
+  }
+
+  function quitter() {
+    ecrireSession("gb.prof.cle", "");
+    ecrireMemo("");
+    ecrireSession("gb.prof.classe", "");
+    location.replace(location.pathname);
   }
 
   // ----------------------------- Export CSV ------------------------------------
@@ -643,6 +861,7 @@ Tout est détaillé dans le fichier **README.md** du site.`) }))));
   // ---------------------------------------------------------------------------
   document.addEventListener("DOMContentLoaded", () => {
     if (!URL_SERVEUR || !CLE) return ecranConfiguration();
-    if (etat.secret) tableau(); else ecranConnexion();
+    const cle = cleDuLien() || lireSession("gb.prof.cle") || lireMemo();
+    if (cle) ouvrirEspace(cle); else ecranEntree();
   });
 })();

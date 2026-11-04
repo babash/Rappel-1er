@@ -88,62 +88,95 @@ BNL.App = (() => {
     return zone;
   }
 
+  // Code de classe passé dans le lien du professeur : …/index.html#classe=K7QM2P
+  function codeClasseDuLien() {
+    const m = (location.hash + "&" + location.search).match(/[#?&]classe=([A-Za-z0-9-]{4,20})/);
+    return m ? m[1].toUpperCase() : "";
+  }
+  const formaterCodeClasse = (c) => { const n = S.normaliserCode(c); return n.length === 6 ? n.slice(0, 3) + "-" + n.slice(3) : c.toUpperCase(); };
+
   function ecranAccueil() {
     const zone = el("div.connexion");
     cadreAccueil(zone);
     if (!S.serveurConfigure) { formulaireHorsLigne(zone); return; }
+    const codeLien = codeClasseDuLien();
+    if (codeLien) { formulaireInscription(zone, codeLien); return; }
     zone.append(
       el("h2", null, "Monte à bord"),
       el("div.choix-depart", null,
         el("button.bouton.principal.large.choix-depart-bouton", { type: "button", onclick: () => formulaireInscription(zone) },
-          el("span.grand", { "aria-hidden": "true" }, "🚀"), el("span", null, el("strong", null, "Je commence l'expédition"), el("small", null, "Première fois"))),
+          el("span.grand", { "aria-hidden": "true" }, "🚀"), el("span", null, el("strong", null, "Je commence l'expédition"), el("small", null, "Première fois : avec le code de ta classe"))),
         el("button.bouton.large.choix-depart-bouton", { type: "button", onclick: () => formulaireCode(zone) },
           el("span.grand", { "aria-hidden": "true" }, "🔑"), el("span", null, el("strong", null, "J'ai déjà un code"), el("small", null, "Je reprends où j'en étais")))));
     if (cfg.AUTORISER_HORS_LIGNE !== false) {
       zone.append(el("button.lien.lien-hors-ligne", { type: "button", onclick: () => formulaireHorsLigne(zone, true) }, "Jouer sans compte (sans suivi de la classe)"));
     }
+    zone.append(el("a.lien.lien-hors-ligne", { href: "prof.html" }, "Espace professeur"));
   }
 
-  function formulaireInscription(zone) {
+  function formulaireInscription(zone, codeDonne) {
     zone.innerHTML = "";
     const form = el("form.formulaire", { novalidate: true });
-    const selectClasse = el("select#classe", { required: true }, el("option", { value: "" }, "Chargement des classes…"));
+    const codeClasse = el("input#code-classe", { type: "text", maxlength: 12, autocomplete: "off", autocapitalize: "characters", spellcheck: "false", required: true, placeholder: "K7Q-M2P", class: "champ-code", value: codeDonne ? formaterCodeClasse(codeDonne) : null });
+    const infoClasse = el("p.info-classe", { "aria-live": "polite" });
     const pseudo = el("input#pseudo", { type: "text", maxlength: 24, autocomplete: "off", spellcheck: "false", required: true, placeholder: "Ton prénom ou un pseudo" });
     const message = el("p.message-formulaire", { role: "alert" });
     const bouton = el("button.bouton.principal.large", { type: "submit" }, "Créer mon code d'expédition");
+    let classeOk = null;
     form.append(
       el("h2", null, "Nouvelle expédition"),
-      el("label.champ", null, el("span.etiquette", null, "1. Ta classe"), selectClasse),
+      el("label.champ", null, el("span.etiquette", null, "1. Le code de ta classe"), codeClasse,
+        el("small.aide-texte", null, "Ton professeur te le donne (au tableau, ou avec un lien / un QR code).")),
+      infoClasse,
       el("label.champ", null, el("span.etiquette", null, "2. Ton prénom (ou un pseudo)"), pseudo),
       el("div.champ.champ-avatar", null, el("span.etiquette", null, "3. Ton emblème"), choixAvatarDepart("avatar-nouveau")),
       message, bouton,
-      el("button.lien", { type: "button", onclick: ecranAccueil }, "← Retour"));
+      el("button.lien", { type: "button", onclick: () => { if (location.hash) history.replaceState(null, "", location.pathname + location.search.replace(/[?&]classe=[^&]*/, "")); ecranAccueil(); } }, "← Retour"));
     zone.append(form);
-    S.listerClasses().then((classes) => {
-      selectClasse.innerHTML = "";
-      if (!classes || !classes.length) {
-        selectClasse.append(el("option", { value: "" }, "Aucune classe ouverte"));
-        message.textContent = "Aucune classe n'est ouverte pour l'instant : ton professeur doit en créer une dans son tableau de bord.";
-        return;
+
+    async function verifierClasse() {
+      const c = S.normaliserCode(codeClasse.value);
+      classeOk = null;
+      infoClasse.className = "info-classe";
+      infoClasse.textContent = "";
+      if (c.length < 6) return null;
+      infoClasse.textContent = "Recherche de la classe…";
+      try {
+        const cl = await S.classeParCode(c);
+        if (S.normaliserCode(codeClasse.value) !== c) return null;
+        if (!cl.ouverte) {
+          infoClasse.className = "info-classe erreur";
+          infoClasse.textContent = `La classe « ${cl.nom} » est fermée aux inscriptions. Demande à ton professeur.`;
+          return null;
+        }
+        classeOk = c;
+        infoClasse.className = "info-classe ok";
+        infoClasse.textContent = `✔ ${cl.nom}${cl.prof ? " · " + cl.prof : ""}${cl.etablissement ? " · " + cl.etablissement : ""}`;
+        return cl;
+      } catch (e) {
+        infoClasse.className = "info-classe erreur";
+        infoClasse.textContent = e.message;
+        return null;
       }
-      selectClasse.append(el("option", { value: "" }, "Choisis ta classe"));
-      classes.forEach((c) => selectClasse.append(el("option", { value: c.id }, c.nom)));
-      if (classes.length === 1) selectClasse.value = classes[0].id;
-    }).catch((e) => {
-      selectClasse.innerHTML = "";
-      selectClasse.append(el("option", { value: "" }, "Serveur injoignable"));
-      message.textContent = e.message + (cfg.AUTORISER_HORS_LIGNE !== false ? " Tu peux jouer sans compte en attendant." : "");
+    }
+    codeClasse.addEventListener("input", () => {
+      const p = codeClasse.selectionStart;
+      codeClasse.value = codeClasse.value.toUpperCase();
+      codeClasse.setSelectionRange(p, p);
+      if (S.normaliserCode(codeClasse.value).length === 6) verifierClasse();
+      else { classeOk = null; infoClasse.textContent = ""; }
     });
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
       message.textContent = "";
-      if (!selectClasse.value) { message.textContent = "Choisis ta classe."; selectClasse.focus(); return; }
+      if (!classeOk && !(await verifierClasse())) { message.textContent = "Vérifie le code de ta classe : il a 6 caractères, par exemple K7Q-M2P."; codeClasse.focus(); return; }
       if (pseudo.value.trim().length < 2) { message.textContent = "Ton prénom ou pseudo doit faire au moins 2 caractères."; pseudo.focus(); return; }
       bouton.disabled = true;
       bouton.textContent = "Création du code…";
       try {
         const avatarId = (form.querySelector("input[name='avatar-nouveau']:checked") || {}).value || "crabe";
-        const code = await S.inscrire(selectClasse.value, pseudo.value.trim(), avatarId);
+        const code = await S.inscrire(classeOk, pseudo.value.trim(), avatarId);
+        if (location.hash) history.replaceState(null, "", location.pathname);
         montrerCode(zone, code);
       } catch (err) {
         message.textContent = err.message;
@@ -151,7 +184,7 @@ BNL.App = (() => {
         bouton.textContent = "Créer mon code d'expédition";
       }
     });
-    pseudo.focus();
+    if (codeDonne) { verifierClasse(); pseudo.focus(); } else codeClasse.focus();
   }
 
   function lireCode(code, bouton) {

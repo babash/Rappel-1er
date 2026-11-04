@@ -12,6 +12,7 @@ Un drone d'**Abyssal Collection** (des collectionneurs qui capturent des espèce
 - **L'élève explicite ce qu'il fait** : « `fiche` est un dictionnaire », « c'est un parcours par indice », « pour chercher un élément, je parcours les éléments un par un »… Avant de coder, il **explique son plan** (étapes « Avant de coder »).
 - **7 compétences** travaillées et suivies : repérer, comprendre, expliquer, compléter, corriger, concevoir, écrire.
 - **Un code élève unique**, donné au début, **qui ne change jamais**, toujours visible (🔑).
+- **Pas de mot de passe professeur** : chaque collègue crée son **espace** et reçoit un **lien personnel** ; chaque classe a un **code d'inscription**, un lien et un **QR code** à projeter.
 - Python tourne **dans le navigateur** (Pyodide) : rien à installer. **Tout est statique** : GitHub Pages, plus Supabase (en option) pour le suivi de classe.
 - **Pensé pour le téléphone** : planches verticales façon webtoon, une colonne, gros boutons, barre d'outils en bas.
 
@@ -107,7 +108,7 @@ Les fiches de cours et le devoir maison fournis ont servi de base : leurs exempl
 
 ### Avec Supabase : un code unique, qui ne change jamais
 
-À la première connexion, l'élève choisit sa classe, son prénom (ou un pseudo) et un emblème. Le site lui donne alors **son code d'expédition**, par exemple `CORAIL-MANTA-482` :
+À la première connexion, l'élève entre le **code de sa classe** (ou scanne le QR code / ouvre le lien donné par le professeur), son prénom (ou un pseudo) et un emblème. Le site lui donne alors **son code d'expédition**, par exemple `CORAIL-MANTA-482` :
 
 - il doit cocher « J'ai écrit mon code » avant de commencer (bouton 🔊 pour l'écouter) ;
 - **ce code ne change jamais**, et il reste **toujours visible** : en haut de l'écran sur ordinateur, bouton **🔑 Mon code** dans la barre du bas sur téléphone ;
@@ -131,7 +132,7 @@ Si le site est ouvert directement depuis un fichier (`file://`), les cookies son
 
 ## 4. Mettre le site en ligne (GitHub Pages)
 
-1. Sur [github.com](https://github.com), crée un **nouveau dépôt public**, par exemple `expedition-gombessa`.
+1. Sur [github.com](https://github.com), crée un **nouveau dépôt public**, par exemple `expedition-gombessa` (ici : `Rappel-1er`).
 2. **Add file › Upload files**, puis glisse **tout le contenu** du dossier (y compris `vendor/` et le fichier caché `.nojekyll`). Valide avec **Commit changes**.
    - Si `.nojekyll` n'apparaît pas, crée-le avec *Add file › Create new file* (nom : `.nojekyll`, contenu vide).
 3. **Settings › Pages** : *Source* = **Deploy from a branch**, *Branch* = `main`, dossier `/ (root)`, puis **Save**.
@@ -166,9 +167,11 @@ Supabase est une base de données en ligne dont l'offre gratuite suffit largemen
 
 1. Crée un compte sur [supabase.com](https://supabase.com), puis **New project**. Choisis une région européenne.
 2. Ouvre **SQL Editor › New query**.
-3. Ouvre `supabase/schema.sql`, **remplace `CHANGE-MOI`** (tout en bas) par le mot de passe du tableau de bord (au moins 8 caractères), copie tout, colle dans l'éditeur SQL, puis **Run**. *Success. No rows returned* : c'est installé. Le script peut être relancé sans risque.
+3. Copie **tout** le fichier `supabase/schema.sql`, colle-le dans l'éditeur SQL, puis **Run**. Il n'y a **aucune valeur à modifier** (pas de mot de passe). *Success. No rows returned* : c'est installé. Le script peut être relancé sans risque, par exemple après une mise à jour du site.
 
-> **Un seul projet Supabase pour plusieurs sites ?** C'est possible (l'offre gratuite limite le nombre de projets). Le script n'ajoute que des objets dont le nom commence par `gb_` (4 tables et des fonctions) et ne modifie ni ne supprime rien d'autre. Si une table `gb_eleves` existait déjà sans venir de ce jeu, il s'arrête avant toute modification.
+> **Un seul projet Supabase pour plusieurs sites ?** C'est possible (l'offre gratuite limite le nombre de projets). Le script n'ajoute que des objets dont le nom commence par `gb_` (4 tables et des fonctions) et ne touche à rien d'autre. Si une table `gb_eleves` ou `gb_classes` existait déjà sans venir de ce jeu, il s'arrête avant toute modification.
+>
+> **Tu avais installé l'ancienne version (avec mot de passe) ?** Relance simplement le nouveau script : l'ancien mot de passe et les anciennes fonctions sont retirés, les classes et les élèves sont gardés, et le **premier espace professeur créé** récupère les classes existantes.
 
 ### 5.2 Récupérer l'adresse et la clé publique
 
@@ -190,9 +193,19 @@ Sur GitHub : ouvre `js/config.js`, clique sur le crayon ✏️, colle les deux v
 
 > La clé publique est faite pour être visible dans un site web : elle ne permet d'appeler que les fonctions prévues par le script (voir la section 9).
 
-### 5.4 Créer les classes
+### 5.4 Les espaces professeur (sans mot de passe)
 
-Ouvre `prof.html`, entre ton mot de passe, puis **Créer une classe** (par exemple « TNSI 1 »). Dans **Gérer les classes**, tu peux **fermer** une classe (plus de nouvelles inscriptions, les codes existants marchent toujours), la supprimer, ou changer le mot de passe du tableau de bord.
+1. Ouvre `prof.html` (lien « Espace professeur » en bas de l'accueil du jeu), puis **Créer mon espace** avec le nom que verront les élèves (ex. « Mme Ali (NSI) ») et, si tu le souhaites, ton **établissement** (facultatif, modifiable ensuite dans *🔗 Mon lien*).
+2. Le site te donne ton **lien personnel** (`…/prof.html#cle=PROF-XXXX-…`) : **enregistre-le** (favori, e-mail à toi-même, ou fichier). C'est lui qui ouvre ton tableau de bord, depuis n'importe quel appareil. Il n'est pas stocké en clair dans la base : sans lui, on ne peut pas retrouver ton espace (voir « Dépannage »).
+3. **Gérer les classes › Créer une classe** : chaque classe est identifiée par son **code d'inscription** (ex. `K7Q-M2P`). Le nom (« TNSI 1 », « groupe B »…) est facultatif et peut être ajouté plus tard (*Renommer*).
+4. **📣 Inviter les élèves** : le code de la classe, le lien d'inscription et un **QR code** à projeter (bouton plein écran).
+
+Pour les collègues :
+
+- **Chaque collègue crée son propre espace** depuis la même adresse : ses classes et ses élèves restent séparés des tiens.
+- Pour **co-animer** une classe, donne ton lien à ton collègue : il voit et gère les mêmes classes que toi.
+- Lien partagé par erreur ? **🔗 Mon lien › Remplacer ma clé** : l'ancien lien ne marche plus, rien d'autre ne change.
+- Sur ton propre ordinateur, **🔗 Mon lien › Se souvenir de mon espace** évite de rouvrir le lien pendant la journée (rien n'est gardé plus d'un jour).
 
 ---
 
@@ -200,14 +213,14 @@ Ouvre `prof.html`, entre ton mot de passe, puis **Créer une classe** (par exemp
 
 ### Côté élèves
 
-1. Ouvrir l'adresse du site sur un ordinateur ou un téléphone (navigateur récent). Au premier lancement, Python est téléchargé (environ 13 Mo, puis mis en cache) pendant la lecture du prologue.
-2. **« Je commence l'expédition »** : classe, prénom, emblème, puis **noter son code** (cahier, agenda ou photo). Il reste ensuite visible sur le bouton 🔑.
+1. Scanner le **QR code** projeté par le professeur, ou ouvrir l'adresse du site et choisir **« Je commence l'expédition »** puis taper le **code de la classe**. Au premier lancement, Python est téléchargé (environ 13 Mo, puis mis en cache) pendant la lecture du prologue.
+2. Prénom, emblème, puis **noter son code d'expédition** (cahier, agenda ou photo). Il reste ensuite visible sur le bouton 🔑.
 3. Les fois suivantes, ou sur un autre appareil : **« J'ai déjà un code »**, toujours le même.
 4. Sur un ordinateur partagé, l'accueil propose « Ce n'est pas moi : changer de joueur » (cela efface les cookies de l'appareil).
 
 ### Côté professeur (`prof.html`)
 
-- **En haut** : inscrits, élèves en plongée, avancement moyen, nombre d'élèves **à aider**.
+- **En haut** : la classe affichée, **📣 Inviter les élèves** (code, lien, QR code), **Gérer les classes** (créer, renommer, fermer, nouveau code d'inscription, supprimer), **🔗 Mon lien** ; puis inscrits, élèves en plongée, avancement moyen, nombre d'élèves **à aider**.
 - **« À aider maintenant »** : élèves en ligne qui bloquent (au moins 4 erreurs, plus de 8 minutes sur la mission, réponse demandée…), avec leur erreur la plus fréquente et un bouton **Voir son travail**.
 - **Élèves** : une case par mission (✓ vert = sans aide, ✓ clair = avec indices ou erreurs, **C** = réponse ou correction vue, bleu = en cours, cercle rouge = mission actuelle) et l'avancement dans chaque expédition. Un clic ouvre la fiche : code d'expédition, compétences, dernier code tapé, lignes rangées, commandes réussies, historique complet (y compris « scène comprise / mauvaise réponse », « briefing lu », « plan expliqué »).
 - **Compétences** : pour chaque élève, missions réussies par compétence, et moyenne de la classe.
@@ -306,13 +319,15 @@ Après une modification de `js/core/harness.py`, lancer `python3 outils/embarque
 |---|---|
 | « Python n'a pas pu démarrer » en local | Voir la section 4 : ouvrir le site avec `python -m http.server 8000` plutôt qu'en double-cliquant. |
 | « Python n'a pas pu démarrer » en ligne | Navigateur trop ancien, ou réseau qui bloque les fichiers `.wasm` : essayer un autre navigateur, ou demander l'ouverture de `github.io` et `cdn.jsdelivr.net`. Le lien « Pourquoi ? » affiche le détail. |
-| « Aucune classe ouverte » | Créer une classe dans `prof.html` (ou la rouvrir dans *Gérer les classes*). |
+| « Code de classe inconnu » | Vérifier le code dans `prof.html` › *Gérer les classes* (les lettres I, O et les chiffres 0, 1 n'y apparaissent jamais). |
+| « La classe est fermée aux inscriptions » | La rouvrir dans *Gérer les classes*. |
 | « La base de données n'est pas installée » | Relancer `supabase/schema.sql` en entier. |
 | « Clé Supabase refusée » | Vérifier `SUPABASE_KEY` (clé *publishable* ou *anon*, sans espace). |
 | « Code inconnu » | Vérifier chaque lettre ; sinon `prof.html` › onglet *Codes d'expédition* pour le retrouver (inutile d'en créer un nouveau). |
 | Un élève a déjà vu une scène et veut la relire | Bouton « Revoir la scène » sous l'histoire ; « Revoir le briefing » pour le rappel de cours. |
 | Plus rien ne se charge après quelques semaines | Les projets Supabase gratuits sont mis en pause après une longue inactivité : **Restore project** dans Supabase. En attendant, on peut jouer sans compte. |
-| Mot de passe du tableau de bord oublié | Dans Supabase › SQL Editor, lancer la ligne commentée « Mot de passe oublié ? » à la fin de `schema.sql`. |
+| Lien professeur perdu | Si un collègue a le lien (co-animation), il peut te le redonner. Sinon, la personne qui gère Supabase peut te créer une nouvelle clé : voir les deux requêtes commentées « Lien professeur perdu ? » à la fin de `schema.sql`. |
+| « Lien professeur inconnu ou remplacé » | La clé a été remplacée (🔗 Mon lien › Remplacer ma clé) : utiliser le nouveau lien. |
 | Connexion coupée pendant la séance | Le jeu continue (cookies) et renvoie la progression au retour de la connexion (pastille ⚠️ en haut). |
 
 ---
@@ -322,9 +337,11 @@ Après une modification de `js/core/harness.py`, lancer `python3 outils/embarque
 - Données enregistrées : la classe, un **prénom ou pseudo**, le code d'expédition, la progression et les essais. Pas d'e-mail, pas de nom de famille. Conseiller un prénom ou un surnom.
 - Les élèves n'ont **aucun accès direct** aux tables : tout passe par des fonctions SQL qui vérifient le jeton de session de l'élève. Un élève ne voit de ses camarades que le pseudo, l'emblème et l'avancement, **jamais leur code**.
 - Une tentative avec un code faux est volontairement ralentie (1 seconde), et il existe environ 1,6 million de codes possibles. Ces codes protègent une progression de jeu, pas des données sensibles.
-- Le tableau de bord est protégé par un mot de passe chiffré (bcrypt). Le mot de passe reste en mémoire dans l'onglet seulement (`sessionStorage`), **jamais dans un cookie**.
+- Pas de mot de passe : chaque espace professeur est ouvert par une **clé aléatoire de 120 bits** (dans le lien `#cle=…`). La base n'en garde que l'**empreinte SHA-256**. Une clé fausse est ralentie (1 seconde). Un professeur ne voit que **ses** classes et **ses** élèves.
+- Dans le navigateur, la clé est retirée de la barre d'adresse dès l'ouverture, gardée dans l'onglet (`sessionStorage`) et, seulement si on le demande, sur l'appareil jusqu'au lendemain. **Jamais dans un cookie.**
+- Le code d'une classe permet seulement de **s'y inscrire** (il ne donne accès à aucune donnée) ; il peut être changé à tout moment.
 - Côté élève, les cookies d'un jour ne servent qu'au fonctionnement du jeu.
-- Le professeur peut supprimer un élève ou une classe à tout moment (suppression définitive).
+- Le professeur peut supprimer un élève, une classe ou tout son espace à tout moment (suppression définitive).
 
 ---
 
@@ -341,7 +358,7 @@ js/ui/                  interface : activités, missions, planches de manga, per
 supabase/schema.sql     base de données à installer dans Supabase
 tests/                  tests automatiques des missions, serveur de test local
 outils/                 script qui embarque harness.py dans le site
-vendor/                 bibliothèques embarquées (Pyodide 314.0.7, Ace 1.45.2)
+vendor/                 bibliothèques embarquées (Pyodide 314.0.7, Ace 1.45.2, qrcode-generator 1.4.4)
 ```
 
 **Faits du carnet de bord**, vérifiés auprès de :
@@ -355,4 +372,5 @@ vendor/                 bibliothèques embarquées (Pyodide 314.0.7, Ace 1.45.2)
 - Les illustrations (personnages et leurs expressions, sous-marins, espèces, décors, coupe de la plongée) sont des dessins vectoriels originaux faits pour ce jeu. Personnages, histoire et données des exercices sont fictifs.
 - [Pyodide](https://pyodide.org) (licence MPL-2.0) : Python dans le navigateur.
 - [Ace](https://ace.c9.io) (licence BSD) : éditeur de code.
+- [qrcode-generator](https://github.com/kazuhikoarase/qrcode-generator) de Kazuhiko Arase (licence MIT) : QR codes d'inscription. « QR Code » est une marque déposée de DENSO WAVE.
 - Polices Lexend, Bricolage Grotesque, Bangers et JetBrains Mono (licence SIL OFL, via Google Fonts).
