@@ -157,7 +157,7 @@ end $$;
 
 -- « corail-manta 482 », « Coràil Manta 482 »… → CORAILMANTA482
 create or replace function public.gb_normaliser_code(p text)
-returns text language sql immutable as $$
+returns text language sql immutable set search_path = public as $$
   select regexp_replace(upper(translate(coalesce(p, ''),
     'àâäáãéèêëíìîïóòôöõúùûüçñÀÂÄÁÃÉÈÊËÍÌÎÏÓÒÔÖÕÚÙÛÜÇÑ',
     'aaaaaeeeeiiiiooooouuuucnAAAAAEEEEIIIIOOOOOUUUUCN')), '[^A-Z0-9]', '', 'g');
@@ -220,7 +220,7 @@ end $$;
 
 -- Nom affiché (obligatoire) et établissement (facultatif) d'un espace
 create or replace function public.gb_verifier_identite(p_nom text, p_etablissement text)
-returns void language plpgsql immutable as $$
+returns void language plpgsql immutable set search_path = public as $$
 begin
   if char_length(btrim(coalesce(p_nom, ''))) < 2 or char_length(btrim(coalesce(p_nom, ''))) > 40 then
     raise exception 'Le nom affiché doit faire entre 2 et 40 caractères (ex. : Mme Ali, NSI).' using errcode = 'P0001';
