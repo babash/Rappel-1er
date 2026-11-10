@@ -391,7 +391,8 @@ print(len(outils))
           ? "Ta progression est enregistrée sur le serveur : tu la retrouveras avec ton **code d'expédition**."
           : "Sans compte, ta progression sera **effacée** de cet appareil. As-tu noté ta **sauvegarde** (Profil › Sauvegarder pour un autre jour) ?", { titre: "Changer d'élève ?", oui: "Quitter" });
         if (ok) { S.deconnecter(); location.reload(); }
-      } }, "Changer d'élève / Se déconnecter")));
+      } }, "Changer d'élève / Se déconnecter")),
+      BNL.U.credits());
     P.ouvrir(contenu, { titre: "Mon profil", classe: "grande" });
   }
 
