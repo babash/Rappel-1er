@@ -55,7 +55,7 @@ BNL.App = (() => {
       contenu.append(el("p.aide-texte", { html: BNL.U.enLigne("Les questions, les tableaux et les lignes à lire marchent sans Python ; seules la console et les programmes en ont besoin.") }));
     }
     const d = BNL.Python.diagnostic();
-    if (d.length) contenu.append(el("details", null, el("summary", null, "Détails techniques (pour le professeur)"), el("pre.v-brut", null, d.join("\n"))));
+    if (d.length) contenu.append(el("details", null, el("summary", null, "Détails techniques (pour l'enseignant·e)"), el("pre.v-brut", null, d.join("\n"))));
     P.ouvrir(contenu, { titre: "Python n'a pas pu démarrer", classe: "petite" });
   }
 
@@ -71,7 +71,8 @@ BNL.App = (() => {
         el("div.marque-accueil", { html: logo() + "<span>Journal de bord de la Luciole</span>" }),
         el("h1", null, "Expédition Gombessa"),
         el("p", null, "Une plongée en Python pour réviser les listes, les dictionnaires et les premiers algorithmes.")),
-      el("div.carte-connexion", null, contenuDroite, statut));
+      el("div.carte-connexion", null, contenuDroite, statut),
+      BNL.U.credits());
     app().innerHTML = "";
     app().append(page);
     etatPython(statut);
@@ -111,7 +112,7 @@ BNL.App = (() => {
     if (cfg.AUTORISER_HORS_LIGNE !== false) {
       zone.append(el("button.lien.lien-hors-ligne", { type: "button", onclick: () => formulaireHorsLigne(zone, true) }, "Jouer sans compte (sans suivi de la classe)"));
     }
-    zone.append(el("a.lien.lien-hors-ligne", { href: "prof.html" }, "Espace professeur"));
+    zone.append(el("a.lien.lien-hors-ligne", { href: "prof.html" }, "Espace enseignant·e"));
   }
 
   function formulaireInscription(zone, codeDonne) {
@@ -126,7 +127,7 @@ BNL.App = (() => {
     form.append(
       el("h2", null, "Nouvelle expédition"),
       el("label.champ", null, el("span.etiquette", null, "1. Le code de ta classe"), codeClasse,
-        el("small.aide-texte", null, "Ton professeur te le donne (au tableau, ou avec un lien / un QR code).")),
+        el("small.aide-texte", null, "Ton enseignant·e te le donne (au tableau, ou avec un lien / un QR code).")),
       infoClasse,
       el("label.champ", null, el("span.etiquette", null, "2. Ton prénom (ou un pseudo)"), pseudo),
       el("div.champ.champ-avatar", null, el("span.etiquette", null, "3. Ton emblème"), choixAvatarDepart("avatar-nouveau")),
@@ -146,7 +147,7 @@ BNL.App = (() => {
         if (S.normaliserCode(codeClasse.value) !== c) return null;
         if (!cl.ouverte) {
           infoClasse.className = "info-classe erreur";
-          infoClasse.textContent = `La classe « ${cl.nom} » est fermée aux inscriptions. Demande à ton professeur.`;
+          infoClasse.textContent = `La classe « ${cl.nom} » est fermée aux inscriptions. Demande à ton enseignant·e.`;
           return null;
         }
         classeOk = c;
@@ -202,7 +203,7 @@ BNL.App = (() => {
     if (ecouter) ecouter.addEventListener("click", () => lireCode(code, ecouter));
     zone.append(
       el("h2", null, "Ton code d'expédition"),
-      el("p", null, "Ce code est à toi seul et il ne changera jamais. Il te permet de reprendre l'expédition plus tard, depuis n'importe quel ordinateur ou téléphone. Tu le retrouveras à tout moment sur le bouton 🔑."),
+      el("p", null, "Ce code est à toi seul·e et il ne changera jamais. Il te permet de reprendre l'expédition plus tard, depuis n'importe quel ordinateur ou téléphone. Tu le retrouveras à tout moment sur le bouton 🔑."),
       el("div.code-expedition", { "aria-label": "Ton code : " + code }, code),
       ecouter,
       el("ul.code-conseils", null,
@@ -222,7 +223,7 @@ BNL.App = (() => {
     const bouton = el("button.bouton.principal.large", { type: "submit" }, "Reprendre mon expédition");
     form.append(el("h2", null, "Reprendre l'expédition"),
       el("label.champ", null, el("span.etiquette", null, "Ton code d'expédition"), champ),
-      el("p.aide-texte", null, "Les tirets et les majuscules ne comptent pas. Code perdu ? Ton professeur peut le retrouver."),
+      el("p.aide-texte", null, "Les tirets et les majuscules ne comptent pas. Code perdu ? Ton enseignant·e peut le retrouver."),
       message, bouton, el("button.lien", { type: "button", onclick: ecranAccueil }, "← Retour"));
     zone.append(form);
     champ.addEventListener("input", () => { const p = champ.selectionStart; champ.value = champ.value.toUpperCase(); champ.setSelectionRange(p, p); });
@@ -254,7 +255,7 @@ BNL.App = (() => {
       el("h2", null, retourPossible ? "Jouer sans compte" : "Monte à bord"),
       el("label.champ", null, el("span.etiquette", null, "Ton prénom (ou un pseudo)"), pseudo),
       el("div.champ.champ-avatar", null, el("span.etiquette", null, "Ton emblème"), choixAvatarDepart("avatar-local")),
-      el("p.aide-texte", null, "Sans compte, ta progression reste 1 jour sur cet appareil. (Le code unique d'élève existe quand le professeur a activé le suivi de classe.)"),
+      el("p.aide-texte", null, "Sans compte, ta progression reste 1 jour sur cet appareil. (Le code unique d'élève existe quand l'enseignant·e a activé le suivi de classe.)"),
       el("details.champ-reprise", null, el("summary", null, "J'ai une sauvegarde (code GB-…)"),
         el("label.champ", null, el("span.etiquette", null, "Code de sauvegarde (il commence par GB-)"), codeReprise)),
       message,
@@ -284,11 +285,11 @@ BNL.App = (() => {
     const j = S.etat.joueur;
     const zone = el("div.connexion.carte-retour", null,
       el("div.retour-avatar", { "aria-hidden": "true" }, S.avatar().emoji),
-      el("h2", null, `Content de te revoir, ${j.pseudo} !`),
+      el("h2", null, `Te revoilà, ${j.pseudo} !`),
       el("p", null, j.horsLigne ? "Ta progression est gardée sur cet appareil." : `Classe : ${j.classeNom || "?"}`),
       el("p.message-formulaire", { role: "alert" }));
     const continuer = el("button.bouton.principal.large", { type: "button" }, "Continuer l'expédition");
-    const pasMoi = el("button.lien", { type: "button" }, "Ce n'est pas moi : changer de joueur");
+    const pasMoi = el("button.lien", { type: "button" }, "Ce n'est pas moi : changer d'élève");
     zone.append(continuer, pasMoi);
     cadreAccueil(zone);
     continuer.focus();
@@ -406,7 +407,7 @@ BNL.App = (() => {
     const ecouter = BNL.U.peutLire() ? el("button.bouton.petit", { type: "button" }, "🔊 Écouter le code") : null;
     if (ecouter) ecouter.addEventListener("click", () => lireCode(code, ecouter));
     P.ouvrir(el("div", null,
-      el("p", null, "C'est ton code, à toi seul. Il ne change jamais."),
+      el("p", null, "C'est ton code, à toi seul·e. Il ne change jamais."),
       el("div.code-expedition", { "aria-label": "Ton code : " + code }, code),
       ecouter,
       el("ul.code-conseils", null,

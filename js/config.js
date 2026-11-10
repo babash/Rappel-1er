@@ -1,5 +1,5 @@
 // =============================================================================
-//  CONFIGURATION — le seul fichier à modifier pour brancher votre classe.
+//  CONFIGURATION — le seul fichier à modifier pour brancher ta classe.
 // =============================================================================
 window.BNL_CONFIG = {
   // Adresse du projet Supabase (Project Settings › API › Project URL)

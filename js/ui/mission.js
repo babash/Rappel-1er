@@ -414,7 +414,7 @@ BNL.Mission = (() => {
         zone.append(b);
       }
     }
-    if (ms.statut !== "reussie") zone.append(el("p.aide-prof", null, "Tu peux aussi lever la main : ton professeur voit où tu en es 🙋"));
+    if (ms.statut !== "reussie") zone.append(el("p.aide-prof", null, "Tu peux aussi lever la main : ton enseignant·e voit où tu en es 🙋"));
   }
 
   function ouvrirIndice(n) {
@@ -433,7 +433,7 @@ BNL.Mission = (() => {
 
   async function ouvrirSolution() {
     if (!etatAide(4).ouvert) return;
-    const ok = await P.confirmer("La correction te donnera moins d'étoiles (★). As-tu bien relu l'indice 3 ?\n\nTu peux aussi demander de l'aide à ton professeur.", { titre: "Voir la correction ?", oui: "Voir la correction", non: "Je réessaie" });
+    const ok = await P.confirmer("La correction te donnera moins d'étoiles (★). As-tu bien relu l'indice 3 ?\n\nTu peux aussi demander de l'aide à ton enseignant·e.", { titre: "Voir la correction ?", oui: "Voir la correction", non: "Je réessaie" });
     if (!ok) return;
     const ms = S.m(mission.id);
     ms.solution = true;
@@ -483,7 +483,7 @@ BNL.Mission = (() => {
       boite.append(el("p", null, "Python n'a pas pu démarrer : impossible de tester ton programme pour l'instant."));
       BNL.Python.aideEchec().forEach((l) => boite.append(el("p.aide-texte", { html: BNL.U.enLigne(l) })));
     } else if (r.phase === "interne" && !r.message) {
-      boite.append(el("p", null, "Un problème technique a empêché la vérification. Relance ; si cela continue, préviens ton professeur."));
+      boite.append(el("p", null, "Un problème technique a empêché la vérification. Relance ; si cela continue, préviens ton enseignant·e."));
       if (r.interne) boite.append(el("p.v-brut", null, el("code", null, r.interne)));
     } else {
       boite.classList.replace("v-erreur", "v-pasencore");
@@ -507,7 +507,7 @@ BNL.Mission = (() => {
       return;
     }
     if (ms.essais === 6 && !ms.solution) {
-      P.coach("Courage ! Chaque essai t'apprend quelque chose. Relis l'indice le plus récent, ou **lève la main** : ton professeur sait que tu travailles sur cette mission.", [], { dans });
+      P.coach("Courage ! Chaque essai t'apprend quelque chose. Relis l'indice le plus récent, ou **lève la main** : ton enseignant·e sait que tu travailles sur cette mission.", [], { dans });
       return;
     }
     const prochain = [2, 3, 4].find((n) => n === (ms.indices || 0) + 1 && etatAide(n).ouvert && ms.indices >= 1);

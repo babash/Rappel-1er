@@ -155,6 +155,12 @@ kbd { font-size: .7em; padding: .1em .45em; border-radius: 4px; background: rgba
 .accueil-titre p { font-size: 1.08rem; max-width: 36ch; color: #dff6f7; }
 .carte-connexion { position: relative; z-index: 1; background: var(--surface); border-radius: var(--r-grand); padding: 1.5rem; box-shadow: var(--ombre-forte); width: 100%; }
 .carte-connexion h2 { font-size: 1.6rem; }
+/* La ligne de crédits (accueil et tableau de bord) : discrète, mais contrastée et lisible sur téléphone */
+.credits { font-size: .85rem; line-height: 1.5; color: var(--texte-doux); text-align: center; margin: 1rem auto 0; padding: 0 1rem; max-width: 80ch; }
+.credits a { color: inherit; text-decoration: underline; text-underline-offset: 2px; white-space: nowrap; }
+.accueil > .credits { grid-column: 1 / -1; position: relative; z-index: 1; justify-self: center; margin: 0; padding: .3rem .9rem; border-radius: 999px; color: #e6f6f7; background: rgba(3, 22, 38, .82); }
+.accueil { grid-template-rows: 1fr auto; }
+@media (max-width: 900px) { .accueil { grid-template-rows: none; } }
 .choix-depart { display: flex; flex-direction: column; gap: .7rem; }
 .choix-depart-bouton { justify-content: flex-start; gap: .9rem; text-align: left; border-radius: var(--r-moyen); padding: .9rem 1rem; }
 .choix-depart-bouton strong { display: block; font-size: 1.05rem; }

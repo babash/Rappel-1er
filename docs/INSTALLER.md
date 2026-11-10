@@ -47,7 +47,7 @@ Supabase est une base de données en ligne dont l'offre gratuite suffit largemen
 
 > **Un seul projet Supabase pour plusieurs sites ?** C'est possible (l'offre gratuite limite le nombre de projets). Le script n'ajoute que des objets dont le nom commence par `gb_` (4 tables et des fonctions) et ne touche à rien d'autre. Si une table `gb_eleves` ou `gb_classes` existait déjà sans venir de ce jeu, il s'arrête avant toute modification.
 >
-> **Tu avais installé l'ancienne version (avec mot de passe) ?** Relance simplement le nouveau script : l'ancien mot de passe et les anciennes fonctions sont retirés, les classes et les élèves sont gardés, et le **premier espace professeur créé** récupère les classes existantes.
+> **Tu avais installé l'ancienne version (avec mot de passe) ?** Relance simplement le nouveau script : l'ancien mot de passe et les anciennes fonctions sont retirés, les classes et les élèves sont gardés, et le **premier espace enseignant·e créé** récupère les classes existantes.
 
 ### 2.2 Récupérer l'adresse et la clé publique
 
@@ -69,9 +69,9 @@ Sur GitHub : ouvre `js/config.js`, clique sur le crayon ✏️, colle les deux v
 
 > La clé publique est faite pour être visible dans un site web : elle ne permet d'appeler que les fonctions prévues par le script (voir [Données et sécurité](DONNEES.md#2-données-personnelles-et-sécurité)).
 
-### 2.4 Les espaces professeur (sans mot de passe)
+### 2.4 Les espaces enseignant·e (sans mot de passe)
 
-1. Ouvre `prof.html` (lien « Espace professeur » en bas de l'accueil du jeu), puis **Créer mon espace** avec le nom que verront les élèves (ex. « Mme Ali (NSI) ») et, si tu le souhaites, ton **établissement** (facultatif, modifiable ensuite dans *🔗 Mon lien*).
+1. Ouvre `prof.html` (lien « Espace enseignant·e » en bas de l'accueil du jeu), puis **Créer mon espace** avec le nom que verront les élèves (ex. « Mme Ali (NSI) ») et, si tu le souhaites, ton **établissement** (facultatif, modifiable ensuite dans *🔗 Mon lien*).
 2. Le site te donne ton **lien personnel** (`…/prof.html#cle=PROF-XXXX-…`) : **enregistre-le** (favori, e-mail à toi-même, ou fichier). C'est lui qui ouvre ton tableau de bord, depuis n'importe quel appareil. Il n'est pas stocké en clair dans la base : sans lui, on ne peut pas retrouver ton espace (voir « [Dépannage](#3-dépannage) »).
 3. **Gérer les classes › Créer une classe** : chaque classe est identifiée par son **code d'inscription** (ex. `K7Q-M2P`). Le nom (« TNSI 1 », « groupe B »…) est facultatif et peut être ajouté plus tard (*Renommer*).
 4. **📣 Inviter les élèves** : le code de la classe, le lien d'inscription et un **QR code** à projeter (bouton plein écran).
@@ -98,6 +98,6 @@ Pour les collègues :
 | « Code inconnu » | Vérifier chaque lettre ; sinon `prof.html` › onglet *Codes d'expédition* pour le retrouver (inutile d'en créer un nouveau). |
 | Un·e élève a déjà vu une scène et veut la relire | Bouton « Revoir la scène » sous l'histoire ; « Revoir le briefing » pour le rappel de cours. |
 | Plus rien ne se charge après quelques semaines | Les projets Supabase gratuits sont mis en pause après une longue inactivité : **Restore project** dans Supabase. En attendant, on peut jouer sans compte. |
-| Lien professeur perdu | Si un·e collègue a le lien (co-animation), il ou elle peut te le redonner. Sinon, la personne qui gère Supabase peut te créer une nouvelle clé : voir les deux requêtes commentées « Lien professeur perdu ? » à la fin de `schema.sql`. |
+| Lien enseignant·e perdu ? | Si un·e collègue a le lien (co-animation), il ou elle peut te le redonner. Sinon, la personne qui gère Supabase peut te créer une nouvelle clé : voir les deux requêtes commentées « Lien professeur perdu ? » à la fin de `schema.sql`. |
 | « Lien professeur inconnu ou remplacé » | La clé a été remplacée (🔗 Mon lien › Remplacer ma clé) : utiliser le nouveau lien. |
 | Connexion coupée pendant la séance | Le jeu continue (cookies) et renvoie la progression au retour de la connexion (pastille ⚠️ en haut). |

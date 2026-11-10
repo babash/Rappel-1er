@@ -1930,7 +1930,7 @@ print(plus_vue(c))   # violoniste
     { type: "choix", q: "Pour trouver le maximum d'une liste de 1 000 nombres, combien de comparaisons @if p > maxi@ faut-il environ ?",
       choix: ["Environ 1 000 (une par élément)", "Environ 1 000 000", "Une seule"], bonne: 0,
       expl: "On regarde chaque élément une fois : le travail grandit **comme la taille de la liste**.",
-      pieges: { 1: "Ça, c'est l'ordre de grandeur d'un tri par sélection, pas d'un maximum.", 2: "Il faut bien regarder tous les éléments pour être sûr." } },
+      pieges: { 1: "Ça, c'est l'ordre de grandeur d'un tri par sélection, pas d'un maximum.", 2: "Il faut bien regarder tous les éléments pour ne rien manquer." } },
     { type: "choix", q: "Si la liste est **2 fois plus longue**, le tri par sélection prend environ…",
       choix: ["2 fois plus de temps", "4 fois plus de temps", "le même temps"], bonne: 1,
       expl: "Le tri par sélection fait environ n²/2 comparaisons : doubler n multiplie le travail par 4.",
