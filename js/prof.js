@@ -89,7 +89,7 @@
 3. Dans *Project Settings › API Keys*, copie l'**URL du projet** et la **clé publique** (*publishable* ou *anon*).
 4. Colle-les dans @js/config.js@ (@SUPABASE_URL@ et @SUPABASE_KEY@), puis publie à nouveau le site.
 
-Tout est détaillé dans le fichier **README.md** du site.`) }))));
+Tout est détaillé dans le fichier **README.md** du site.`) }))), BNL.U.credits());
   }
 
   // Pas de mot de passe : chaque professeur a son espace, ouvert par un lien secret.
@@ -133,11 +133,11 @@ Tout est détaillé dans le fichier **README.md** du site.`) }))));
     app().innerHTML = "";
     app().append(entete(), el("main.prof-centre.prof-entree", null,
       el("div.carte-connexion", null, el("h2", null, "Nouveau : créer mon espace"),
-        el("p.aide-texte", null, "Chaque professeur a son propre espace, avec ses classes. Tu recevras un lien personnel : c'est lui qui ouvre ton tableau de bord."),
+        el("p.aide-texte", null, "Chaque enseignant·e a son propre espace, avec ses classes. Tu recevras un lien personnel : c'est lui qui ouvre ton tableau de bord."),
         formA),
       el("div.carte-connexion", null, el("h2", null, "J'ai déjà un espace"),
         el("p.aide-texte", null, "Le plus simple : ouvre le lien enregistré dans tes favoris ou ta messagerie. Sinon, colle-le ici."),
-        formB)));
+        formB)), BNL.U.credits());
     nom.focus();
   }
 
@@ -171,7 +171,7 @@ Tout est détaillé dans le fichier **README.md** du site.`) }))));
       info.classes_recuperees ? el("p.aide-texte", null, `${info.classes_recuperees} classe(s) déjà créée(s) avec l'ancienne version ont été rattachées à ton espace.`) : null,
       blocLien(info.cle),
       el("label.case-a-cocher", { for: "lien-note" }, coche, el("span", null, "J'ai enregistré mon lien (favori, e-mail ou fichier)")),
-      go)));
+      go)), BNL.U.credits());
   }
 
   function copier(texte, bouton) {
@@ -183,13 +183,13 @@ Tout est détaillé dans le fichier **README.md** du site.`) }))));
   // Le lien de l'espace, avec les moyens de le garder
   function blocLien(cle) {
     const lien = lienProf(cle);
-    const champ = el("input.champ-lien", { type: "text", readonly: true, value: lien, "aria-label": "Ton lien professeur" });
+    const champ = el("input.champ-lien", { type: "text", readonly: true, value: lien, "aria-label": "Ton lien enseignant·e" });
     champ.addEventListener("focus", () => champ.select());
     const bCopier = el("button.bouton.petit.principal", { type: "button" }, "📋 Copier le lien");
     bCopier.addEventListener("click", () => copier(lien, bCopier));
-    const corpsMail = `Mon espace professeur Expédition Gombessa :\n${lien}\n\nClé (si besoin) : ${cle}\nNe pas diffuser : ce lien ouvre mes classes.`;
-    const mail = el("a.bouton.petit", { href: "mailto:?subject=" + encodeURIComponent("Mon lien professeur Expédition Gombessa") + "&body=" + encodeURIComponent(corpsMail) }, "✉️ M'envoyer par e-mail");
-    const fichier = el("a.bouton.petit", { href: URL.createObjectURL(new Blob([corpsMail], { type: "text/plain;charset=utf-8" })), download: "lien-professeur-gombessa.txt" }, "💾 Télécharger un fichier");
+    const corpsMail = `Mon espace enseignant·e Expédition Gombessa :\n${lien}\n\nClé (si besoin) : ${cle}\nNe pas diffuser : ce lien ouvre mes classes.`;
+    const mail = el("a.bouton.petit", { href: "mailto:?subject=" + encodeURIComponent("Mon lien enseignant·e Expédition Gombessa") + "&body=" + encodeURIComponent(corpsMail) }, "✉️ M'envoyer par e-mail");
+    const fichier = el("a.bouton.petit", { href: URL.createObjectURL(new Blob([corpsMail], { type: "text/plain;charset=utf-8" })), download: "mon-lien-gombessa.txt" }, "💾 Télécharger un fichier");
     return el("div.bloc-lien", null,
       el("p", null, el("strong", null, "Ton lien personnel"), " : il ouvre ton tableau de bord depuis n'importe quel ordinateur ou téléphone, sans mot de passe."),
       champ,
@@ -197,7 +197,7 @@ Tout est détaillé dans le fichier **README.md** du site.`) }))));
       el("p.aide-texte", null, "Clé (à garder aussi) : ", el("code.code-prof", null, cle)),
       el("ul.aide-texte", null,
         el("li", null, "Ajoute-le à tes favoris ou envoie-le-toi par e-mail : sans lui, on ne peut pas retrouver ton espace."),
-        el("li", null, "Pour co-animer avec un collègue, donne-lui ce lien. Pour un collègue qui a ses propres classes : qu'il crée son espace."),
+        el("li", null, "Pour co-animer avec un·e collègue, donne-lui ce lien. Pour un·e collègue qui a ses propres classes : qu'il ou elle crée son espace."),
         el("li", null, "Lien partagé par erreur ? « Mon lien › Remplacer ma clé » : l'ancien lien ne marchera plus.")));
   }
 
@@ -304,10 +304,11 @@ Tout est détaillé dans le fichier **README.md** du site.`) }))));
           return el("button" + (etat.onglet === id ? ".actif" : ""), { type: "button", role: "tab", "data-onglet": id, onclick: () => { etat.onglet = id; $$(".prof-onglets button").forEach((b) => b.classList.toggle("actif", b.dataset.onglet === id)); rendreOnglet(); } }, t);
         })),
       el("section.prof-contenu"),
-      el("p.prof-maj.aide-texte")));
+      el("p.prof-maj.aide-texte"),
+      BNL.U.credits()));
     if (!etat.classes.length) {
       $(".prof-contenu").append(el("div.carte-connexion.large", null, el("h2", null, "Crée ta première classe"),
-        el("p", null, "Chaque classe reçoit un code d'inscription (et un lien / QR code) à donner aux élèves. Ils recevront ensuite leur propre code d'expédition."),
+        el("p", null, "Chaque classe reçoit un code d'inscription (et un lien / QR code) à donner aux élèves. Ils et elles recevront ensuite leur propre code d'expédition."),
         el("button.bouton.principal", { type: "button", onclick: gererClasses }, "Créer une classe")));
     }
   }
@@ -346,7 +347,7 @@ Tout est détaillé dans le fichier **README.md** du site.`) }))));
     const alertes = a.filter((x) => x.alerte).length;
     zone.innerHTML = "";
     const carte = (v, l, cls) => el("div.prof-chiffre" + (cls ? "." + cls : ""), null, el("strong", null, String(v)), el("span", null, l));
-    zone.append(carte(n, "élèves inscrits"), carte(enLigne, "en plongée maintenant", enLigne ? "vert" : ""),
+    zone.append(carte(n, "élèves inscrit·e·s"), carte(enLigne, "en plongée maintenant", enLigne ? "vert" : ""),
       carte(`${moy} / ${PRINCIPALES.length}`, "missions principales (moyenne)"),
       carte(`${fini} / ${n}`, "ont rencontré le gombessa"), carte(alertes, "à aider", alertes ? "rouge" : ""));
   }
@@ -375,8 +376,8 @@ Tout est détaillé dans le fichier **README.md** du site.`) }))));
     if (!zone || !etat.classes.length) return;
     zone.innerHTML = "";
     if (!etat.eleves.length) {
-      zone.append(el("div.vide-prof", null, el("p", null, "Aucun élève dans cette classe pour l'instant."),
-        el("p.aide-texte", null, "Clique sur « 📣 Inviter les élèves » : projette le QR code ou donne le code de la classe. Ils tapent leur prénom, puis notent leur code d'expédition."),
+      zone.append(el("div.vide-prof", null, el("p", null, "Aucun·e élève dans cette classe pour l'instant."),
+        el("p.aide-texte", null, "Clique sur « 📣 Inviter les élèves » : projette le QR code ou donne le code de la classe. Ils et elles tapent leur prénom, puis notent leur code d'expédition."),
         el("button.bouton.principal", { type: "button", onclick: inviter }, "📣 Inviter les élèves")));
       return;
     }
@@ -607,7 +608,7 @@ Tout est détaillé dans le fichier **README.md** du site.`) }))));
     contenu.append(el("div.fiche-actions", null,
       el("button.bouton.petit", { type: "button", onclick: () => nouveauCode(e, zoneCode) }, "Nouveau code"),
       el("button.bouton.petit", { type: "button", onclick: () => renommer(e) }, "Renommer"),
-      el("button.bouton.petit.discret", { type: "button", onclick: () => supprimerEleve(e, f) }, "Supprimer cet élève")));
+      el("button.bouton.petit.discret", { type: "button", onclick: () => supprimerEleve(e, f) }, "Supprimer cet·te élève")));
     const comps = el("ul.liste-competences");
     Object.entries(BNL.COMPETENCES).forEach(([cid, c]) => {
       const v = x.comps[cid];
@@ -703,7 +704,7 @@ Tout est détaillé dans le fichier **README.md** du site.`) }))));
         });
         const nouveau = el("button.bouton.petit.discret", { type: "button", title: "L'ancien code d'inscription ne marchera plus" }, "Nouveau code");
         nouveau.addEventListener("click", async () => {
-          const ok = await P.confirmer(`Changer le code d'inscription de **${c.nom}** ? L'ancien code et l'ancien QR code ne marcheront plus. Les élèves déjà inscrits ne sont pas touchés.`, { titre: "Nouveau code de classe", oui: "Changer" });
+          const ok = await P.confirmer(`Changer le code d'inscription de **${c.nom}** ? L'ancien code et l'ancien QR code ne marcheront plus. Les élèves déjà inscrit·e·s ne sont pas touché·e·s.`, { titre: "Nouveau code de classe", oui: "Changer" });
           if (!ok) return;
           await rpc("gb_prof_nouveau_code_classe", { p_cle: etat.cle, p_classe: c.id });
           rendre();
@@ -723,7 +724,7 @@ Tout est détaillé dans le fichier **README.md** du site.`) }))));
           el("div.actions-classe", null, el("label.interrupteur", null, ouverte, el("span", null, "ouverte")), renommerC, nouveau, suppr)));
       });
       contenu.append(ul,
-        el("p.aide-texte", null, "Une classe fermée n'accepte plus de nouvelles inscriptions, mais les élèves déjà inscrits continuent avec leur code d'expédition."));
+        el("p.aide-texte", null, "Une classe fermée n'accepte plus de nouvelles inscriptions, mais les élèves déjà inscrit·e·s continuent avec leur code d'expédition."));
     }
     rendre().catch((err) => { contenu.append(el("p.message-formulaire", null, err.message)); });
     f.options.surFermeture = () => tableau();
@@ -813,7 +814,7 @@ Tout est détaillé dans le fichier **README.md** du site.`) }))));
     });
     const supprimer = el("button.bouton.petit.discret", { type: "button" }, "Supprimer mon espace…");
     supprimer.addEventListener("click", async () => {
-      const ok = await P.confirmer(`Supprimer **ton espace**, toutes tes classes (${etat.classes.length}) et tous leurs élèves ? C'est **définitif**.`, { titre: "Supprimer mon espace", oui: "Tout supprimer" });
+      const ok = await P.confirmer(`Supprimer **ton espace**, toutes tes classes (${etat.classes.length}) et tou·te·s leurs élèves ? C'est **définitif**.`, { titre: "Supprimer mon espace", oui: "Tout supprimer" });
       if (!ok) return;
       try { await rpc("gb_prof_supprimer_espace", { p_cle: etat.cle }); ecrireSession("gb.prof.cle", ""); ecrireMemo(""); location.replace(location.pathname); } catch (err) { msg.textContent = err.message; }
     });
@@ -824,7 +825,7 @@ Tout est détaillé dans le fichier **README.md** du site.`) }))));
       el("h3", null, "Sécurité"),
       el("p.aide-texte", null, "Ton lien donne accès à tes classes. Si tu l'as partagé par erreur, remplace la clé."),
       el("div.bloc-lien-actions", null, remplacer, supprimer));
-    const f = P.ouvrir(contenu, { titre: "🔗 Mon lien professeur", classe: "petite" });
+    const f = P.ouvrir(contenu, { titre: "🔗 Mon lien enseignant·e", classe: "petite" });
   }
 
   function quitter() {

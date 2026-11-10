@@ -240,8 +240,8 @@ print(len(outils))
       contenu.innerHTML = "";
       if (!S.enLigne()) {
         contenu.append(el("p", null, S.serveurConfigure
-          ? "Tu joues sans compte : pour voir l'équipage, reviens avec ton code d'expédition (Profil › Changer de joueur)."
-          : "Le jeu n'est pas relié à un serveur de classe : ta progression reste sur cet appareil. Ton professeur peut activer le suivi de classe (voir le fichier README.md)."));
+          ? "Tu joues sans compte : pour voir l'équipage, reviens avec ton code d'expédition (Profil › Changer d'élève)."
+          : "Le jeu n'est pas relié à un serveur de classe : ta progression reste sur cet appareil. Ton enseignant·e peut activer le suivi de classe (voir le fichier README.md)."));
         return;
       }
       const enLigneC = (c) => Date.now() - new Date(c.vu_le).getTime() < 120000;
@@ -266,7 +266,7 @@ print(len(outils))
               ` · ${c.etoiles} ★ · ${c.badges} badge${c.badges > 1 ? "s" : ""}`))));
       });
       contenu.append(ol);
-      contenu.append(el("p.aide-texte", null, "Ce n'est pas une course : chacun plonge à son rythme. Aider un camarade à comprendre, ça compte aussi !"));
+      contenu.append(el("p.aide-texte", null, "Ce n'est pas une course : chacun·e plonge à son rythme. Aider un·e camarade à comprendre, ça compte aussi !"));
     }
     rendre();
     BNL.App.rafraichirCamarades().then(rendre);
@@ -307,7 +307,7 @@ print(len(outils))
       }
     } else {
       boiteCode.append(el("h3", null, "💾 Sans compte"),
-        el("p.aide-texte", null, "Tu joues sans compte : ta progression reste 1 jour sur cet appareil. Le code d'élève unique (qui ne change jamais) existe quand ton professeur active le suivi de classe."),
+        el("p.aide-texte", null, "Tu joues sans compte : ta progression reste 1 jour sur cet appareil. Le code d'élève unique (qui ne change jamais) existe quand ton enseignant·e active le suivi de classe."),
         el("details.sauvegarde-sans-compte", null, el("summary", null, "Sauvegarder pour un autre jour"),
           el("div.code-expedition.petit", null, S.codeProgression()),
           el("p.aide-texte", null, "Ce code de sauvegarde contient tes missions réussies : il change donc quand tu progresses. Pour le réutiliser : Accueil › Jouer sans compte › J'ai une sauvegarde.")));
@@ -389,9 +389,9 @@ print(len(outils))
       el("button.bouton", { type: "button", onclick: async () => {
         const ok = await P.confirmer(S.enLigne()
           ? "Ta progression est enregistrée sur le serveur : tu la retrouveras avec ton **code d'expédition**."
-          : "Sans compte, ta progression sera **effacée** de cet appareil. As-tu noté ta **sauvegarde** (Profil › Sauvegarder pour un autre jour) ?", { titre: "Changer de joueur ?", oui: "Quitter" });
+          : "Sans compte, ta progression sera **effacée** de cet appareil. As-tu noté ta **sauvegarde** (Profil › Sauvegarder pour un autre jour) ?", { titre: "Changer d'élève ?", oui: "Quitter" });
         if (ok) { S.deconnecter(); location.reload(); }
-      } }, "Changer de joueur / Se déconnecter")));
+      } }, "Changer d'élève / Se déconnecter")));
     P.ouvrir(contenu, { titre: "Mon profil", classe: "grande" });
   }
 

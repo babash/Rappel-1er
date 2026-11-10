@@ -37,7 +37,7 @@ Si le site est ouvert directement depuis un fichier (`file://`), les cookies son
 - Données enregistrées : la classe, un **prénom ou pseudo**, le code d'expédition, la progression et les essais. Pas d'e-mail, pas de nom de famille. Conseiller un prénom ou un surnom.
 - Les élèves n'ont **aucun accès direct** aux tables : tout passe par des fonctions SQL qui vérifient le jeton de session de l'élève. Un·e élève ne voit de ses camarades que le pseudo, l'emblème et l'avancement, **jamais leur code**.
 - Une tentative avec un code faux est volontairement ralentie (1 seconde), et il existe environ 1,6 million de codes possibles. Ces codes protègent une progression de jeu, pas des données sensibles.
-- Pas de mot de passe : chaque espace professeur est ouvert par une **clé aléatoire de 120 bits** (dans le lien `#cle=…`). La base n'en garde que l'**empreinte SHA-256**. Une clé fausse est ralentie (1 seconde). Chaque enseignant·e ne voit que **ses** classes et **ses** élèves.
+- Pas de mot de passe : chaque espace enseignant·e est ouvert par une **clé aléatoire de 120 bits** (dans le lien `#cle=…`). La base n'en garde que l'**empreinte SHA-256**. Une clé fausse est ralentie (1 seconde). Chaque enseignant·e ne voit que **ses** classes et **ses** élèves.
 - Dans le navigateur, la clé est retirée de la barre d'adresse dès l'ouverture, gardée dans l'onglet (`sessionStorage`) et, seulement si on le demande, sur l'appareil jusqu'au lendemain. **Jamais dans un cookie.**
 - Le code d'une classe permet seulement de **s'y inscrire** (il ne donne accès à aucune donnée) ; il peut être changé à tout moment.
 - Côté élève, les cookies d'un jour ne servent qu'au fonctionnement du jeu.

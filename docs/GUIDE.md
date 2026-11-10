@@ -102,11 +102,11 @@ Les fiches de cours et le devoir maison fournis ont servi de base : leurs exempl
 1. Scanner le **QR code** projeté par l'enseignant·e, ou ouvrir l'adresse du site et choisir **« Je commence l'expédition »** puis taper le **code de la classe**. Au premier lancement, Python est téléchargé (environ 13 Mo, puis mis en cache) pendant la lecture du prologue.
 2. Prénom, emblème, puis **noter son code d'expédition** (cahier, agenda ou photo). Il reste ensuite visible sur le bouton 🔑.
 3. Les fois suivantes, ou sur un autre appareil : **« J'ai déjà un code »**, toujours le même.
-4. Sur un ordinateur partagé, l'accueil propose « Ce n'est pas moi : changer de joueur » (cela efface les cookies de l'appareil).
+4. Sur un ordinateur partagé, l'accueil propose « Ce n'est pas moi : changer d'élève » (cela efface les cookies de l'appareil).
 
 ### Côté enseignant·e (`prof.html`)
 
-- **En haut** : la classe affichée, **📣 Inviter les élèves** (code, lien, QR code), **Gérer les classes** (créer, renommer, fermer, nouveau code d'inscription, supprimer), **🔗 Mon lien** ; puis inscrits, élèves en plongée, avancement moyen, nombre d'élèves **à aider**.
+- **En haut** : la classe affichée, **📣 Inviter les élèves** (code, lien, QR code), **Gérer les classes** (créer, renommer, fermer, nouveau code d'inscription, supprimer), **🔗 Mon lien** ; puis élèves inscrit·e·s, élèves en plongée, avancement moyen, nombre d'élèves **à aider**.
 - **« À aider maintenant »** : élèves en ligne qui bloquent (au moins 4 erreurs, plus de 8 minutes sur la mission, réponse demandée…), avec leur erreur la plus fréquente et un bouton **Voir son travail**.
 - **Élèves** : une case par mission (✓ vert = sans aide, ✓ clair = avec indices ou erreurs, **C** = réponse ou correction vue, bleu = en cours, cercle rouge = mission actuelle) et l'avancement dans chaque expédition. Un clic ouvre la fiche : code d'expédition, compétences, dernier code tapé, lignes rangées, commandes réussies, historique complet (y compris « scène comprise / mauvaise réponse », « briefing lu », « plan expliqué »).
 - **Compétences** : pour chaque élève, missions réussies par compétence, et moyenne de la classe.

@@ -227,7 +227,11 @@ BNL.U = (() => {
     return g;
   }
 
+  // La ligne de crédits, en bas de l'accueil et du tableau de bord
+  const credits = () => el("p.credits", null, "Conçu par Babash - NSI Tani Malandi · ",
+    el("a", { href: "https://github.com/babash/Rappel-1er#licence", target: "_blank", rel: "noopener" }, "code MIT, documents CC BY-SA 4.0"));
+
   const reduitMouvement = () => window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  return { $, $$, el, echapper, colorer, md, enLigne, texteBrut, lire, peutLire, duree, depuis, retarder, reduitMouvement };
+  return { $, $$, el, echapper, colorer, md, enLigne, texteBrut, lire, peutLire, duree, depuis, retarder, reduitMouvement, credits };
 })();

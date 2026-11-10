@@ -209,7 +209,7 @@ BNL.Store = (() => {
     try { donnees = texte ? JSON.parse(texte) : null; } catch (e) { donnees = texte; }
     if (!reponse.ok) {
       let message = (donnees && (donnees.message || donnees.msg || donnees.error)) || ("Erreur du serveur (" + reponse.status + ")");
-      if (reponse.status === 404 && /function|schema cache/i.test(message)) message = "La base de données n'est pas installée : le professeur doit lancer supabase/schema.sql.";
+      if (reponse.status === 404 && /function|schema cache/i.test(message)) message = "La base de données n'est pas installée : l'enseignant·e doit lancer supabase/schema.sql.";
       if (reponse.status === 401) message = "Clé Supabase refusée : vérifie SUPABASE_KEY dans js/config.js.";
       throw new ErreurServeur(message, reponse.status);
     }
