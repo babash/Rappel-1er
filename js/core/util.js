@@ -227,9 +227,12 @@ BNL.U = (() => {
     return g;
   }
 
-  // La ligne de crédits, en bas de l'accueil et du tableau de bord
+  // La ligne de crédits, en bas de l'accueil, du tableau de bord et du profil :
+  // l'auteur, la licence et le lien vers le code source (décision du 10/11)
   const credits = () => el("p.credits", null, "Conçu par Babash - NSI Tani Malandi · ",
-    el("a", { href: "https://github.com/babash/Rappel-1er#licence", target: "_blank", rel: "noopener" }, "code MIT, documents CC BY-SA 4.0"));
+    el("a", { href: "https://github.com/babash/Rappel-1er#licence", target: "_blank", rel: "noopener" }, "code MIT, documents CC BY-SA 4.0"),
+    " · ",
+    el("a", { href: "https://github.com/babash/Rappel-1er", target: "_blank", rel: "noopener" }, "Code source sur GitHub"));
 
   const reduitMouvement = () => window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
