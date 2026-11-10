@@ -10,12 +10,20 @@
 
 Les migrations sont écrites pour `apply_migration`, qui exécute chaque fichier en une seule transaction : elles n'ont ni `begin` ni `commit`. Si une instruction échoue, rien n'est appliqué.
 
-## Où en est la base du site publié (10/11/2026)
+## Où en est la base du site publié (11/11/2026)
 
 - **Le projet :** `cukahpyqkljiddmimpyi`, partagé avec SNT 1er jour et Alien Python. Gombessa n'y touche qu'aux objets `gb_`.
-- **Le désaccord :** la page publiée appelle depuis le 04/11 (commit `eeb49b5`) les fonctions des espaces professeur. La base, elle, est restée à l'ancienne version : un mot de passe unique (`gb_reglages`), `gb_prof_test`, `gb_classes_ouvertes()`, `gb_inscription(p_classe uuid, …)`, et pas de table `gb_profs`.
-- **La conséquence :** l'inscription de nouvel·le·s élèves et tout l'espace enseignant·e sont cassés en ligne. Les élèves déjà inscrit·e·s (1 classe, 25 élèves, 2 840 lignes de journal) entrent encore avec leur code.
-- **Le remède :** la migration 0001.
+- **Avant :** depuis le 04/11 (commit `eeb49b5`), la page publiée appelait les fonctions des espaces enseignant·e, alors que la base était restée à l'ancienne version (un mot de passe unique dans `gb_reglages`, pas de table `gb_profs`). L'inscription de nouvel·le·s élèves et l'espace enseignant·e étaient cassés en ligne.
+- **La migration :** `gombessa_0001_espaces`, appliquée le 10/11/2026 à 19 h 19 (heure de Mayotte), version `20261110161938`. Le texte appliqué est celui de `0001-espaces.sql`, au mot près : empreinte vérifiée, commentaires et espaces mis à part.
+- **Après l'application (métadonnées seulement) :**
+  - 4 tables `gb_` ;
+  - plus de `gb_reglages` ni d'anciennes fonctions ;
+  - 25 fonctions appelables par `anon`, et aucun droit direct sur les tables ;
+  - 1 classe, 25 élèves et 2 840 événements gardés.
+- **L'espace :** l'enseignant a créé son espace le 10/11 au soir ; 1 espace, 0 classe sans enseignant·e.
+- **Ce qui reste :**
+  - constater en ligne que l'inscription et l'espace enseignant·e sont de nouveau en état de marche (vérification g du § 4) ;
+  - le droit d'`authenticated` sur ces 25 fonctions sera retiré au n° 2 de la base unique (`base_unique_0002`, règle P4).
 
 ## La migration 0001, dans l'ordre
 
