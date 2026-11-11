@@ -112,7 +112,7 @@ Une question, une idée, un bug ? Les [issues GitHub](https://github.com/babash/
 
 ## Licence
 
-- **Le code** (les fichiers `.html`, `.css`, `.js` et `.py`, et `supabase/schema.sql`) est sous licence [MIT](LICENSE), sauf ce qui suit.
+- **Le code** (les fichiers `.html`, `.css`, `.js` et `.py`, et les scripts SQL de `supabase/`) est sous licence [MIT](LICENSE), sauf ce qui suit.
 - **Les documents** (les missions, le mémo et l'histoire de `js/data/`, les illustrations originales des personnages, des sous-marins, des espèces et des décors, et les guides et les images de `docs/`) sont sous licence [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/deed.fr).
 - **[Pyodide](https://pyodide.org)** (Python dans le navigateur, `vendor/pyodide/`) : licence MPL-2.0.
 - **[Ace](https://ace.c9.io)** (l'éditeur de code, `vendor/ace/`) : licence BSD.
