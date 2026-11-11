@@ -1,3 +1,4 @@
+begin;
 -- =============================================================================
 --  Expédition Gombessa : migration 0001, les espaces professeur
 --  Projet Supabase cukahpyqkljiddmimpyi. Nom de migration : gombessa_0001_espaces
@@ -10,9 +11,6 @@
 --  recopié tel quel, avec une seule différence : « set local search_path »
 --  au lieu de « set search_path », pour que le réglage s'arrête avec la
 --  migration.
---
---  Pas de begin ni de commit : apply_migration exécute le fichier en une seule
---  transaction. Si une instruction échoue, rien n'est appliqué.
 --
 --  Ne touche que des objets gb_ :
 --   - SUPPRIME la table gb_reglages (1 ligne : l'empreinte de l'ancien mot de
@@ -681,3 +679,5 @@ end $$;
 
 -- Demande à l'API de recharger la liste des fonctions.
 notify pgrst, 'reload schema';
+
+commit;

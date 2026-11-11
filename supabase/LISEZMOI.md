@@ -8,22 +8,24 @@
 | `0001-espaces.sql` | La migration 0001, pour la base du site publié : les espaces professeur, sans mot de passe. |
 | `0001-espaces-inverse.sql` | Le SQL inverse de 0001 : revenir à l'état d'avant. |
 
-Les migrations sont écrites pour `apply_migration`, qui exécute chaque fichier en une seule transaction : elles n'ont ni `begin` ni `commit`. Si une instruction échoue, rien n'est appliqué.
+Chaque migration est un fichier qui commence par `begin;` et finit par `commit;` (règle des bases) : lancé tel quel dans l'éditeur SQL, il s'exécute en une seule transaction. Par `apply_migration`, on retire seulement ces deux lignes, car l'outil exécute déjà le fichier en une seule transaction. Si une instruction échoue, rien n'est appliqué.
 
 ## Où en est la base du site publié (11/11/2026)
 
 - **Le projet :** `cukahpyqkljiddmimpyi`, partagé avec SNT 1er jour et Alien Python. Gombessa n'y touche qu'aux objets `gb_`.
 - **Avant :** depuis le 04/11 (commit `eeb49b5`), la page publiée appelait les fonctions des espaces enseignant·e, alors que la base était restée à l'ancienne version (un mot de passe unique dans `gb_reglages`, pas de table `gb_profs`). L'inscription de nouvel·le·s élèves et l'espace enseignant·e étaient cassés en ligne.
-- **La migration :** `gombessa_0001_espaces`, appliquée le 10/11/2026 à 19 h 19 (heure de Mayotte), version `20261110161938`. Le texte appliqué est celui de `0001-espaces.sql`, au mot près : empreinte vérifiée, commentaires et espaces mis à part.
+- **La migration :** `gombessa_0001_espaces`, appliquée le 10/11/2026 à 19 h 19 (heure de Mayotte), version `20261110161938`. Le texte appliqué est celui de `0001-espaces.sql` sans ses lignes `begin;` et `commit;`, au mot près : empreinte vérifiée, commentaires et espaces mis à part.
 - **Après l'application (métadonnées seulement) :**
   - 4 tables `gb_` ;
   - plus de `gb_reglages` ni d'anciennes fonctions ;
   - 25 fonctions appelables par `anon`, et aucun droit direct sur les tables ;
   - 1 classe, 25 élèves et 2 840 événements gardés.
-- **L'espace :** l'enseignant a créé son espace le 10/11 au soir ; 1 espace, 0 classe sans enseignant·e.
-- **Ce qui reste :**
-  - constater en ligne que l'inscription et l'espace enseignant·e sont de nouveau en état de marche (vérification g du § 4) ;
-  - le droit d'`authenticated` sur ces 25 fonctions sera retiré au n° 2 de la base unique (`base_unique_0002`, règle P4).
+- **L'espace :** l'enseignant a créé son espace le 10/11 à 23 h 03 (heure de Mayotte) ; 1 espace, 0 classe sans enseignant·e.
+- **Le n° 2 de la base unique** (`base_unique_0002_retrait_authenticated_et_sequences`, appliqué le 11/11 à 16 h 31, heure de Mayotte, comme le n° 1 et le n° 3, entre 16 h 30 et 16 h 33 ; version `20261111133115`, règle P4) :
+  - `authenticated` n'a plus aucun droit : ni sur les fonctions `gb_`, ni sur les tables ;
+  - la séquence `gb_evenements_id_seq` est fermée à `anon` et à `authenticated` ;
+  - l'alerte 0029 a disparu ; l'alerte 0028 porte sur 24 fonctions de Gombessa, les fonctions d'entrée `security definer` (la 25e, `gb_normaliser_code`, ne l'est pas).
+- **Ce qui reste :** constater en ligne que l'inscription et l'espace enseignant·e sont de nouveau en état de marche (vérification g du § 4).
 
 ## La migration 0001, dans l'ordre
 
@@ -42,7 +44,7 @@ Les migrations sont écrites pour `apply_migration`, qui exécute chaque fichier
 Le chef d'orchestre applique le fichier avec `apply_migration` :
 - projet `cukahpyqkljiddmimpyi` ;
 - nom de migration `gombessa_0001_espaces` ;
-- le contenu exact de `0001-espaces.sql`.
+- le contenu exact de `0001-espaces.sql`, sans ses lignes `begin;` et `commit;`.
 
 ### 3. Juste après : l'enseignant crée son espace
 
@@ -113,7 +115,8 @@ select (select count(*) from public.gb_classes) as classes,       -- 1
 
 **f. Les conseillers** (`get_advisors`, sécurité) :
 - l'avertissement 0011 sur `gb_normaliser_code` a disparu ;
-- les avertissements 0028 et 0029 des fonctions `gb_` portent exactement sur les 25 fonctions d'entrée : ce sont les portes d'entrée voulues.
+- l'avertissement 0028 des fonctions `gb_` porte exactement sur les 24 fonctions d'entrée `security definer` (toutes sauf `gb_normaliser_code`) : ce sont les portes d'entrée voulues ;
+- l'avertissement 0029 (fonctions appelables par `authenticated`) a disparu depuis le n° 2 de la base unique (11/11).
 
 **g. La page publiée :**
 - un·e élève s'inscrit avec le code de la classe ;
@@ -153,7 +156,7 @@ Les élèves, leur progression et leur journal sont tous gardés, y compris ceux
 
 1. **L'enseignant exporte les trois tables**, comme avant la migration.
 2. **Si deux classes portent le même nom** (deux « TNSI 1 » dans deux espaces), il en renomme une dans `prof.html`. Sinon, le SQL inverse s'arrête sans rien modifier : l'ancienne version veut des noms tous différents.
-3. **Le chef d'orchestre applique `0001-espaces-inverse.sql`** avec `apply_migration`, sous le nom `gombessa_0001_espaces_inverse`. Le fichier s'arrête sans rien modifier si la migration 0001 n'a pas été appliquée.
+3. **Le chef d'orchestre applique `0001-espaces-inverse.sql`** (sans ses lignes `begin;` et `commit;`) avec `apply_migration`, sous le nom `gombessa_0001_espaces_inverse`. Le fichier s'arrête sans rien modifier si la migration 0001 n'a pas été appliquée.
 4. **L'enseignant choisit un nouveau mot de passe**, dans l'éditeur SQL de Supabase. Il remplace le texte entre apostrophes, et n'enregistre pas la requête :
 
    ```sql

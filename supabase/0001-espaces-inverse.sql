@@ -1,3 +1,4 @@
+begin;
 -- =============================================================================
 --  Expédition Gombessa : SQL inverse de la migration 0001 (espaces professeur)
 --  Projet Supabase cukahpyqkljiddmimpyi. Nom de migration : gombessa_0001_espaces_inverse
@@ -22,10 +23,6 @@
 --  page publiée appelle les fonctions de la version 0001 ; après ce retour, il
 --  faut aussi republier l'ancienne page (avant eeb49b5), sinon l'inscription et
 --  l'espace enseignant·e sont de nouveau cassés.
---
---  Pas de begin ni de commit : apply_migration exécute le fichier en une seule
---  transaction. Si une instruction échoue (un garde-fou, par exemple), rien
---  n'est modifié.
 --
 --  Ne touche que des objets gb_ :
 --   - SUPPRIME la table gb_profs, les colonnes gb_classes.code et
@@ -533,3 +530,5 @@ end $$;
 
 -- Demande à l'API de recharger la liste des fonctions.
 notify pgrst, 'reload schema';
+
+commit;
